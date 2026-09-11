@@ -1,0 +1,7 @@
+// Original i/p monogram: two stems, one open counter. No icon-library glyph.
+export function brandMark() {
+  return `<svg class="brand-symbol" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="56" height="56" rx="18" fill="var(--primary, #8B5000)"/><path d="M26 42V17H34C41 17 45 21 45 27S41 37 34 37H26" stroke="var(--onPrimary, #FFFFFF)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 29V42" stroke="var(--onPrimary, #FFFFFF)" stroke-width="5.5" stroke-linecap="round"/><circle cx="14" cy="18" r="3.2" fill="var(--primaryContainer, #FFDCC2)"/></svg>`;
+}
+export function wordmark(href = "#welcome", extra = "") {
+  return `<a class="wordmark ${extra}" href="${href}" aria-label="Interview Prep AI — accueil">${brandMark()}<span class="wordmark-name">interview<span>prep<span class="wordmark-ai">ai.</span></span></span></a>`;
+}

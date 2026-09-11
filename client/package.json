@@ -1,0 +1,25 @@
+{
+  "name": "interview-prep-ai",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc && vite build",
+    "test": "vitest run",
+    "format": "prettier --write src tests"
+  },
+  "dependencies": {
+    "@fontsource-variable/roboto-serif": "^5.2.8",
+    "@fontsource/material-symbols-rounded": "^5.2.27",
+    "@material/web": "^2.4.1",
+    "idb-keyval": "^6.2.2"
+  },
+  "devDependencies": {
+    "happy-dom": "^20.14.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0",
+    "vitest": "^3.2.7"
+  }
+}

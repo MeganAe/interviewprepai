@@ -1,0 +1,321 @@
+.payment-page {
+  max-width: 1060px;
+  margin: 0 auto;
+}
+.payment-heading {
+  margin: 16px 0 32px;
+  max-width: 780px;
+}
+.payment-heading h1 {
+  font-size: clamp(28px, 3.2vw, 42px);
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: -1.2px;
+  margin: 12px 0 16px;
+}
+.payment-heading p,
+.pricing-form-card > p,
+.payment-confirmed > p {
+  color: var(--onSurfaceVariant);
+  line-height: 1.8;
+}
+.pricing-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 24px;
+  align-items: start;
+}
+.pricing-offer,
+.pricing-form-card,
+.payment-confirmed {
+  border-radius: 20px;
+  padding: 28px;
+  min-width: 0;
+}
+.pricing-offer {
+  background: var(--primaryContainer);
+  color: var(--onPrimaryContainer);
+}
+.pricing-offer .eyebrow {
+  color: var(--onPrimaryContainer);
+}
+.pricing-offer h2 {
+  font-size: 23px;
+  font-weight: 720;
+  margin: 18px 0;
+}
+.offer-price {
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 750;
+  letter-spacing: -1px;
+  min-height: 56px;
+  overflow-wrap: anywhere;
+}
+.offer-frequency {
+  margin: 8px 0 28px;
+  font-size: 12px;
+}
+.offer-benefits {
+  list-style: none;
+  margin: 0;
+  padding: 24px 0;
+  border-top: 1px solid var(--outline);
+  display: grid;
+  gap: 20px;
+}
+.offer-benefits li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  line-height: 1.6;
+}
+.offer-benefits .icon {
+  flex: 0 0 24px;
+}
+.offer-disclaimer,
+.payment-safety {
+  font-size: 11px;
+  line-height: 1.8;
+}
+.pricing-form-card {
+  background: var(--surfaceContainerLow);
+  border: 1px solid var(--outlineVariant);
+}
+.pricing-form-card h2 {
+  font-size: 22px;
+  margin: 0 0 12px;
+  font-weight: 720;
+}
+.pricing-form-card > p {
+  margin: 0 0 24px;
+  font-size: 12px;
+}
+#checkout-form {
+  display: grid;
+  gap: 20px;
+}
+.payment-field-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+}
+.payment-page md-filled-text-field {
+  width: 100%;
+  min-width: 0;
+  --md-filled-text-field-container-shape: 16px;
+  --md-filled-text-field-container-color: var(--surfaceContainerHighest);
+  --md-filled-text-field-input-text-font: "Roboto Serif Variable", serif;
+  --md-filled-text-field-label-text-font: "Roboto Serif Variable", serif;
+  --md-filled-text-field-supporting-text-font: "Roboto Serif Variable", serif;
+  --md-filled-text-field-input-text-size: 14px;
+  --md-filled-text-field-label-text-size: 13px;
+  --md-filled-text-field-supporting-text-size: 10px;
+}
+.payment-page md-filled-button,
+.payment-page md-outlined-button {
+  --md-filled-button-container-height: 56px;
+  --md-outlined-button-container-height: 56px;
+  --md-filled-button-label-text-weight: 700;
+  --md-outlined-button-label-text-weight: 650;
+}
+.payment-page md-filled-button md-circular-progress {
+  --md-circular-progress-size: 20px;
+}
+.payment-page .form-error:empty {
+  display: none;
+}
+.payment-page .form-error {
+  overflow-wrap: anywhere;
+  line-height: 1.7;
+}
+.payment-safety {
+  color: var(--onSurfaceVariant);
+  margin: 0;
+}
+.privacy-text-link {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  text-align: left;
+  padding: 12px 0;
+  margin-top: 12px;
+  border: 0;
+  background: none;
+  color: var(--primary);
+  font-size: 11px;
+  line-height: 1.7;
+}
+.privacy-text-link .icon {
+  font-size: 18px;
+}
+.payment-auth-actions {
+  display: grid;
+  gap: 12px;
+}
+.pricing-public {
+  padding-top: 24px;
+  padding-bottom: 72px;
+}
+.merci-page {
+  max-width: 720px;
+  margin: 48px auto;
+}
+.payment-confirmed {
+  background: var(--surfaceContainerLow);
+  border: 1px solid var(--outlineVariant);
+  text-align: center;
+  padding: 40px;
+}
+.payment-confirmed h1 {
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.25;
+  font-weight: 750;
+  letter-spacing: -1px;
+  margin: 16px 0;
+}
+.payment-confirmed > p {
+  font-size: 13px;
+}
+.merci-symbol {
+  width: 80px;
+  height: 80px;
+  border-radius: 28px;
+  display: grid;
+  place-items: center;
+  background: var(--tertiaryContainer);
+  color: var(--onTertiaryContainer);
+  margin: 0 auto 24px;
+}
+.merci-symbol .icon {
+  font-size: 36px;
+}
+#merci-progress {
+  margin: 24px 0;
+}
+#merci-progress:empty {
+  display: none;
+}
+.merci-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin: 24px 0;
+}
+.payment-page [hidden] {
+  display: none !important;
+}
+.payment-gate {
+  display: grid;
+  justify-items: center;
+  gap: 20px;
+  text-align: center;
+  padding: 72px 16px;
+}
+.payment-gate p {
+  max-width: 520px;
+  color: var(--onSurfaceVariant);
+  line-height: 1.8;
+}
+.bottom-nav a[href="#pricing"] .icon {
+  font-family: "Material Symbols Rounded";
+}
+.access-banner {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  margin-bottom: 24px;
+  background: var(--secondaryContainer);
+  color: var(--onSecondaryContainer);
+  border-radius: 20px;
+}
+.access-banner p {
+  margin: 0;
+  line-height: 1.7;
+  font-size: 12px;
+}
+.access-banner > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex-shrink: 0;
+}
+@media (max-width: 1100px) {
+  .pricing-layout {
+    gap: 16px;
+  }
+  .pricing-offer,
+  .pricing-form-card {
+    padding: 24px;
+  }
+}
+@media (max-width: 900px) {
+  .access-banner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .pricing-layout {
+    grid-template-columns: 1fr;
+  }
+  .payment-heading {
+    margin-top: 8px;
+  }
+  .offer-benefits {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 520px) {
+  .pricing-offer,
+  .pricing-form-card,
+  .payment-confirmed {
+    padding: 24px 20px;
+  }
+  .payment-heading h1 {
+    font-size: 29px;
+    letter-spacing: -0.9px;
+  }
+  .payment-heading p {
+    font-size: 12px;
+  }
+  .offer-benefits {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .payment-field-row {
+    grid-template-columns: 1fr;
+  }
+  .merci-page {
+    margin: 24px auto;
+  }
+  .merci-actions {
+    flex-direction: column;
+  }
+  .pricing-public {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+.payment-page md-outlined-button,
+.payment-page md-text-button {
+  transition: transform 0.2s var(--spring);
+}
+.payment-page md-outlined-button:active,
+.payment-page md-text-button:active {
+  transform: scale(0.97);
+}
+.privacy-text-link,
+.marketing-nav a[href="#pricing"] {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .payment-page md-outlined-button,
+  .payment-page md-text-button {
+    transition: none;
+  }
+}

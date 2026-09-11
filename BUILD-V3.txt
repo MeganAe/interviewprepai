@@ -1,0 +1,140 @@
+INTERVIEW PREP AI — V3 — COMPILATION DE PRODUCTION
+Date UTC : 2026-09-08 21:04:58
+
+Outils :
+v22.23.2
+10.9.8
+8.0.424
+
+Plateforme : Linux x86_64
+
+--- npm ci --prefix client ---
+
+added 75 packages, and audited 76 packages in 3s
+
+19 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+--- npm test --prefix client (DOM uniquement, sans navigateur) ---
+
+> interview-prep-ai@3.0.0 test
+> vitest run
+
+
+ RUN  v3.2.7 /home/user/interview-prep/client
+
+stderr | tests/interface.test.ts
+Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.
+
+ ✓ tests/interface.test.ts (25 tests) 4623ms
+   ✓ Public website and account navigation (DOM, not browser) > creates, persists, edits, searches and deletes a personal note  397ms
+   ✓ Public website and account navigation (DOM, not browser) > runs a complete interview UI flow and favorite removal  1017ms
+   ✓ Public website and account navigation (DOM, not browser) > confirms before clearing local data and preserves server CVs  312ms
+stderr | tests/payments.test.ts
+Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.
+
+ ✓ tests/payments.test.ts (15 tests) 250ms
+stderr | tests/payment-routing.test.ts
+Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.
+
+ ✓ tests/payment-routing.test.ts (15 tests) 1174ms
+
+ Test Files  3 passed (3)
+      Tests  55 passed (55)
+   Start at  21:05:02
+   Duration  7.50s (transform 284ms, setup 35ms, collect 179ms, tests 6.05s, environment 674ms, prepare 179ms)
+
+
+--- dotnet test tests -c Release (PostgreSQL local réel) ---
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  server -> /home/user/interview-prep/server/bin/Release/net8.0/server.dll
+  InterviewPrep.Tests -> /home/user/interview-prep/tests/bin/Release/net8.0/InterviewPrep.Tests.dll
+Test run for /home/user/interview-prep/tests/bin/Release/net8.0/InterviewPrep.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 17.11.1 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    55, Skipped:     0, Total:    55, Duration: 15 s - InterviewPrep.Tests.dll (net8.0)
+
+--- Tests migration SQLite → PostgreSQL ---
+test_commit_preserves_ids_password_hash_and_json_without_granting_access (test_migration.MigrationTests.test_commit_preserves_ids_password_hash_and_json_without_granting_access) ... ok
+test_corrupt_source_is_rejected (test_migration.MigrationTests.test_corrupt_source_is_rejected) ... ok
+test_default_is_real_dry_run_with_rollback (test_migration.MigrationTests.test_default_is_real_dry_run_with_rollback) ... ok
+test_nonempty_destination_is_never_overwritten (test_migration.MigrationTests.test_nonempty_destination_is_never_overwritten) ... ok
+test_postgres_json_failure_rolls_back_already_inserted_users (test_migration.MigrationTests.test_postgres_json_failure_rolls_back_already_inserted_users) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 1.004s
+
+OK
+
+--- npm run build --prefix client ---
+
+> interview-prep-ai@3.0.0 build
+> tsc && vite build
+
+vite v6.4.3 building for production...
+transforming...
+✓ 154 modules transformed.
+rendering chunks...
+computing gzip size...
+../server/wwwroot/index.html                                                         0.80 kB │ gzip:  0.48 kB
+../server/wwwroot/assets/roboto-serif-vietnamese-wght-normal-CxKL5W6j.woff2         13.18 kB
+../server/wwwroot/assets/roboto-serif-cyrillic-ext-wght-normal-DXLjCNQb.woff2       15.70 kB
+../server/wwwroot/assets/roboto-serif-cyrillic-wght-normal-CD-1NJUE.woff2           32.04 kB
+../server/wwwroot/assets/roboto-serif-latin-ext-wght-normal-B9BEn9Tg.woff2          49.85 kB
+../server/wwwroot/assets/roboto-serif-latin-wght-normal-CusprKnR.woff2              66.10 kB
+../server/wwwroot/assets/material-symbols-rounded-latin-400-normal-aJh4e20F.woff2  370.89 kB
+../server/wwwroot/assets/material-symbols-rounded-latin-400-normal-BO6ZQiOa.woff   445.00 kB
+../server/wwwroot/assets/index-Bv6u6e3L.css                                         66.76 kB │ gzip: 16.71 kB
+../server/wwwroot/assets/material-uC_9Sa4j.js                                      184.28 kB │ gzip: 40.26 kB
+../server/wwwroot/assets/index-D18-fZyk.js                                         212.61 kB │ gzip: 47.17 kB
+✓ built in 1.01s
+
+--- dotnet publish server -c Release -r linux-x64 --self-contained false -p:UseAppHost=false -o artifacts/render-linux-x64 ---
+  Determining projects to restore...
+  Restored /home/user/interview-prep/server/server.csproj (in 406 ms).
+  server -> /home/user/interview-prep/server/bin/Release/net8.0/linux-x64/server.dll
+  server -> /home/user/interview-prep/artifacts/render-linux-x64/
+
+--- Contrôles HTTP du résultat publié (sans navigateur) ---
+Serveur : Production, liaison 0.0.0.0:10000 ; PostgreSQL local avec TLS VerifyFull et CA de test.
+GET / → 200
+GET /assets/index-D18-fZyk.js → 200
+GET /assets/material-uC_9Sa4j.js → 200
+GET /assets/index-Bv6u6e3L.css → 200
+GET /assets/material-symbols-rounded-latin-400-normal-BO6ZQiOa.woff → 200
+GET /assets/material-symbols-rounded-latin-400-normal-aJh4e20F.woff2 → 200
+GET /assets/roboto-serif-cyrillic-ext-wght-normal-DXLjCNQb.woff2 → 200
+GET /assets/roboto-serif-cyrillic-wght-normal-CD-1NJUE.woff2 → 200
+GET /assets/roboto-serif-latin-ext-wght-normal-B9BEn9Tg.woff2 → 200
+GET /assets/roboto-serif-latin-wght-normal-CusprKnR.woff2 → 200
+GET /assets/roboto-serif-vietnamese-wght-normal-CxKL5W6j.woff2 → 200
+GET /favicon.svg → 200
+GET /api/health → 200
+POST /api/checkout → 401
+GET /api/checkout/status → 401
+POST /api/pulse → 401
+GET /api/unknown → 404
+POST /api/auth/register → 200
+Cookie : Secure, HttpOnly, SameSite=Strict (valeur non enregistrée).
+GET /api/checkout/status → 200
+GET /api/data → 402
+POST /api/cvs → 402
+POST /api/sessions → 402
+GET /api/checkout/offer → 503
+GET /api/account/export → 200
+POST /api/checkout → 503
+DELETE /api/me → 200
+GET /api/me → 401
+Compte technique supprimé. Aucun appel de paiement ni appel Gemini réel.
+SQL exécuté deux fois sans erreur (création puis réexécution).
+Publication inspectée : Npgsql présent, aucune dépendance SQLite, aucun fichier de base/clé privée, configuration des secrets vide.
+TOTAL TESTS : 115 réussis (55 DOM + 55 API/PostgreSQL + 5 migration).
+Note : le warning Lit concerne le mode test DOM ; pas une vérification de rendu navigateur.
+Note : les clés de cookie en base ne sont pas chiffrées par un certificat applicatif ; restriction de la base requise (voir guide).
+Non réalisé : image Docker (moteur absent), déploiement distant, paiement réel, appels réels Supabase/Chariow/Gemini, vérification navigateur.

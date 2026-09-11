@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: interview-prep-ai
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://0.0.0.0:10000
+      - key: Supabase__ConnectionString
+        sync: false
+      - key: Chariow__ApiKey
+        sync: false
+      - key: Chariow__ProductId
+        sync: false
+      - key: Chariow__PulseSecret
+        sync: false
+      - key: Gemini__ApiKey
+        sync: false
+      - key: Gemini__Model
+        value: gemini-2.5-flash

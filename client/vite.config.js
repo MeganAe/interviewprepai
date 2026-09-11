@@ -1,0 +1,2 @@
+import { defineConfig } from 'vite';
+export default defineConfig({server:{host:'0.0.0.0',allowedHosts:true,proxy:{'/api':'http://127.0.0.1:5080'}},build:{outDir:'../server/wwwroot',emptyOutDir:true,rollupOptions:{output:{manualChunks:{material:['@material/web/button/filled-button.js','@material/web/dialog/dialog.js','@material/web/textfield/outlined-text-field.js','@material/web/select/outlined-select.js']}}}}});
