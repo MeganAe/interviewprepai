@@ -22,6 +22,7 @@ if(!connectionOptions.ContainsKey("Maximum Pool Size"))connectionOptions.MaxPool
 connectionOptions.IncludeErrorDetail=false;
 builder.Services.AddSingleton(_=>new NpgsqlDataSourceBuilder(connectionOptions.ConnectionString).Build());
 builder.Services.AddSingleton<Store>();
+builder.Services.AddSingleton<AdminAccess>();
 builder.Services.AddSingleton<IXmlRepository,PostgresXmlRepository>();
 builder.Services.AddDataProtection().SetApplicationName("InterviewPrepAI");
 builder.Services.AddOptions<KeyManagementOptions>().Configure<IXmlRepository>((o,repository)=>o.XmlRepository=repository);
@@ -53,6 +54,7 @@ builder.Services.AddRateLimiter(o => {
     o.RejectionStatusCode = 429;
     o.OnRejected = async (c, ct) => await c.HttpContext.Response.WriteAsJsonAsync(new { error = "Trop de demandes. Réessayez dans une minute." }, ct);
     o.AddPolicy("auth", c => RateLimitPartition.GetFixedWindowLimiter(c.Connection.RemoteIpAddress?.ToString() ?? "local", _ => new() { PermitLimit = 15, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+    o.AddPolicy("support", c => RateLimitPartition.GetFixedWindowLimiter(c.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "anonymous", _ => new() { PermitLimit = 20, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
     o.AddPolicy("checkout", c => RateLimitPartition.GetFixedWindowLimiter(c.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "anonymous", _ => new() { PermitLimit = 8, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
     o.AddPolicy("offer", c => RateLimitPartition.GetFixedWindowLimiter(c.Connection.RemoteIpAddress?.ToString() ?? "local", _ => new() { PermitLimit = 30, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
     o.AddPolicy("ai", c => RateLimitPartition.GetFixedWindowLimiter(c.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "anonymous", _ => new() { PermitLimit = 6, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
@@ -83,7 +85,7 @@ app.Use(async(ctx,next)=>{
 });
 app.UseDefaultFiles(); app.UseStaticFiles();
 app.MapGet("/api/health", async(NpgsqlDataSource source,IConfiguration c,CancellationToken ct)=>{
-    try{await using var cmd=source.CreateCommand("SELECT u.is_paid,u.paid_at,u.chariow_sale_id,r.\"userId\",p.sale_id,c.response,k.xml FROM public.users u,public.records r,public.payment_receipts p,public.checkout_sessions c,public.data_protection_keys k WHERE false");await cmd.ExecuteNonQueryAsync(ct);return Results.Ok(new{status="ok",geminiConfigured=!string.IsNullOrWhiteSpace(c["Gemini:ApiKey"])});}
+    try{await using var cmd=source.CreateCommand("SELECT u.is_paid,u.paid_at,u.chariow_sale_id,r.\"userId\",p.sale_id,c.response,k.xml FROM public.users u,public.records r,public.payment_receipts p,public.checkout_sessions c,public.data_protection_keys k,public.support_tickets st,public.support_messages sm,public.site_settings ss WHERE false");await cmd.ExecuteNonQueryAsync(ct);return Results.Ok(new{status="ok",geminiConfigured=!string.IsNullOrWhiteSpace(c["Gemini:ApiKey"])});}
     catch{return Results.Json(new{status="unavailable"},statusCode:503);}
 });
 app.MapPost("/api/auth/register", async (Credentials input, Store db, HttpContext ctx) => {
@@ -102,11 +104,11 @@ app.MapPost("/api/auth/login", async (Credentials input, Store db, HttpContext c
     var salt = user == null ? new byte[16] : Convert.FromBase64String(user.Salt);
     var hash = Rfc2898DeriveBytes.Pbkdf2(input.Password!, salt, 600000, HashAlgorithmName.SHA256, 32);
     if (user == null || !CryptographicOperations.FixedTimeEquals(hash, Convert.FromBase64String(user.Hash))) throw new ApiError("E-mail ou mot de passe incorrect.", 401);
-    await Auth.SignIn(ctx, user.Id); return Results.Ok(new { user.Id, user.Name, user.Email });
+    await Auth.SignIn(ctx, user.Id); return Results.Ok(new { user.Id, user.Name, user.Email, is_admin=ctx.RequestServices.GetRequiredService<AdminAccess>().IsAdmin(user.Id) });
 }).RequireRateLimiting("auth");
 app.MapPost("/api/auth/logout", async (HttpContext ctx) => { await ctx.SignOutAsync("session"); return Results.Ok(new { ok = true }); });
 var api = app.MapGroup("/api").RequireAuthorization();
-api.MapGet("/me", (HttpContext ctx, Store db) => { var u = db.UserById(Auth.Id(ctx)) ?? throw new ApiError("Reconnectez-vous.",401); return new { u.Id, u.Name, u.Email, is_paid=u.IsPaid,paid_at=u.PaidAt }; });
+api.MapGet("/me", (HttpContext ctx, Store db) => { var u = db.UserById(Auth.Id(ctx)) ?? throw new ApiError("Reconnectez-vous.",401); return new { u.Id, u.Name, u.Email, is_paid=u.IsPaid,paid_at=u.PaidAt,is_admin=ctx.RequestServices.GetRequiredService<AdminAccess>().IsAdmin(u.Id) }; });
 api.MapPut("/me", (Profile p, HttpContext ctx, Store db) => { if ((p.Name ?? "").Trim().Length is < 2 or > 60) throw new ApiError("Le nom doit contenir entre 2 et 60 caractères.",400); db.Execute("UPDATE users SET name=@name WHERE id=@id",("name",p.Name!.Trim()),("id",Auth.Id(ctx))); return Results.Ok(new { ok=true }); });
 api.MapDelete("/me", async (HttpContext ctx, Store db) => { var id=Auth.Id(ctx); db.Execute("DELETE FROM users WHERE id=@id",("id",id)); await ctx.SignOutAsync("session"); return Results.Ok(new { ok=true }); });
 api.MapGet("/data", (HttpContext ctx, Store db) => new { cvs=db.List(Auth.Id(ctx),"cv"), sessions=db.List(Auth.Id(ctx),"session") });

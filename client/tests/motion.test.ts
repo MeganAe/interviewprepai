@@ -180,10 +180,12 @@ describe("Expressive enhancement without changing application behaviour", () => 
     expect(document.documentElement.dataset.siteMotion).toBeUndefined();
     dispose = () => {};
   });
-  it("uses a bespoke interview mark, bounded illustration, and accessible home link", () => {
+  it("uses a text-only identity, bounded illustration, and accessible home link", () => {
     document.body.innerHTML = wordmark() + interviewArt();
-    expect(document.querySelectorAll(".brand-person")).toHaveLength(2);
-    expect(document.querySelector(".brand-conversation")).not.toBeNull();
+    expect(document.querySelector(".wordmark svg")).toBeNull();
+    expect(document.querySelector(".brand-text")!.textContent).toBe(
+      "Interview Prep AI",
+    );
     expect(
       document.querySelector(".wordmark")!.getAttribute("aria-label"),
     ).toContain("accueil");

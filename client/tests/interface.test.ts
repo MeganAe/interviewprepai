@@ -156,10 +156,8 @@ describe.sequential(
       expect(document.querySelector(".sidebar")).toBeNull();
       expect(el("h1").textContent).toContain("Trouvez les mots");
     });
-    it("uses the interview conversation logo and correct semantic illustration containers", () => {
-      expect(
-        document.querySelector(".wordmark .brand-symbol path"),
-      ).not.toBeNull();
+    it("uses the text-only logo and correct semantic illustration containers", () => {
+      expect(document.querySelector(".wordmark .brand-text")).not.toBeNull();
       expect(el(".landing-illustration").querySelector("svg")).not.toBeNull();
       const css = readFileSync("./src/refinements.css", "utf8");
       expect(css).toMatch(/\.practice-visual\s*\{[^}]*overflow:\s*hidden/s);

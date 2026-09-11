@@ -9,6 +9,7 @@ const user = {
   name: "Compte Test",
   email: "compte@example.test",
 };
+let adminAccess = false;
 let signedIn = false,
   paid = false,
   statusError = false;
@@ -27,7 +28,12 @@ const fetch = vi.fn(async (path: string, options: RequestInit = {}) => {
     return statusError
       ? json({ error: "Service indisponible." }, 503)
       : signedIn
-        ? json({ is_paid: paid, paid_at: paid ? "2026-09-08T12:00:00Z" : null })
+        ? json({
+            is_paid: paid,
+            is_admin: adminAccess,
+            has_access: paid || adminAccess,
+            paid_at: paid ? "2026-09-08T12:00:00Z" : null,
+          })
         : json({}, 401);
   if (path === "/api/checkout/offer")
     return json({
@@ -172,3 +178,26 @@ describe.sequential(
     });
   },
 );
+
+it("allows admin creation routes without payment and labels the exemption honestly", async () => {
+  paid = false;
+  adminAccess = true;
+  await hash("home");
+  await hash("practice");
+  expect(location.hash).toBe("#practice");
+  expect(document.querySelector(".practice-card")).not.toBeNull();
+  expect(document.querySelector('.sidebar a[href="#admin"]')).not.toBeNull();
+  expect(document.querySelector('.sidebar a[href="#pricing"]')).toBeNull();
+  await hash("pricing");
+  expect(document.querySelector("#pricing-page")).toBeNull();
+  expect(document.querySelector("#main-content")!.textContent).toContain(
+    "Accès administrateur gratuit",
+  );
+  await hash("merci");
+  expect(document.querySelector("#main-content")!.textContent).toContain(
+    "Accès administrateur gratuit",
+  );
+  adminAccess = false;
+  await hash("practice");
+  expect(location.hash).toBe("#pricing");
+});

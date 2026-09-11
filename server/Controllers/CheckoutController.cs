@@ -9,11 +9,11 @@ using Npgsql;
 public record CheckoutCustomer(string? FirstName,string? LastName,string? Email,string? Phone,string? CountryCode);
 
 [ApiController,Authorize,Route("api/checkout")]
-public class CheckoutController(Store db,ChariowClient chariow,IConfiguration config,IWebHostEnvironment env):ControllerBase {
+public class CheckoutController(Store db,ChariowClient chariow,IConfiguration config,IWebHostEnvironment env,AdminAccess admin):ControllerBase {
     [HttpGet("status")]
     public async Task<IActionResult> Status(CancellationToken ct) {
         var user=await db.UserByIdAsync(Auth.Id(HttpContext),ct);if(user==null)return Unauthorized();
-        return Ok(new{is_paid=user.IsPaid,paid_at=user.PaidAt});
+        return Ok(new{is_paid=user.IsPaid,paid_at=user.PaidAt,is_admin=admin.IsAdmin(user.Id),has_access=user.IsPaid||admin.IsAdmin(user.Id)});
     }
     [AllowAnonymous,HttpGet("offer"),EnableRateLimiting("offer")]
     public async Task<IActionResult> Offer(CancellationToken ct) {
@@ -25,6 +25,7 @@ public class CheckoutController(Store db,ChariowClient chariow,IConfiguration co
     public async Task<IActionResult> Create([FromBody] CheckoutCustomer customer,CancellationToken ct) {
         var id=Auth.Id(HttpContext);var user=await db.UserByIdAsync(id,ct);
         if(user==null)return Unauthorized();
+        if(admin.IsAdmin(user.Id))return Ok(new{data=new{step="admin_access",payment=new{checkout_url=(string?)null}}});
         if(user.IsPaid)return Ok(new{data=new{step="already_paid",payment=new{checkout_url=(string?)null}}});
         var first=customer.FirstName?.Trim()??"";var last=customer.LastName?.Trim()??"";
         var email=customer.Email?.Trim().ToLowerInvariant()??"";

@@ -1,0 +1,816 @@
+/* V5: typographic identity + real help, contact and administration. Scheme roles only. */
+.wordmark {
+  gap: 0;
+  flex-shrink: 0;
+}
+.brand-text {
+  display: block;
+  font-family: "Roboto Serif Variable", Georgia, serif;
+  font-weight: 750;
+  font-size: 24px;
+  line-height: 1.22;
+  letter-spacing: -1.05px;
+  color: var(--onSurface);
+  white-space: nowrap;
+}
+.workspace-wordmark .brand-text {
+  font-size: 21px;
+  letter-spacing: -0.85px;
+}
+.public-footer .brand-text {
+  font-size: 26px;
+}
+.visual-stamp {
+  display: none;
+}
+.hub {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 24px 0 40px;
+  min-width: 0;
+}
+.hub-public {
+  padding-block: 32px;
+}
+.hub .icon {
+  font-family: "Material Symbols Rounded";
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  font-variation-settings: normal;
+}
+.hub-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 12px 0 32px;
+}
+.hub-heading h1 {
+  font-size: clamp(28px, 3.5vw, 44px);
+  line-height: 1.18;
+  font-weight: 750;
+  letter-spacing: -1.4px;
+  margin: 14px 0;
+  max-width: 830px;
+  overflow-wrap: anywhere;
+}
+.hub-heading p {
+  max-width: 750px;
+  color: var(--onSurfaceVariant);
+  font-size: 14px;
+  line-height: 1.9;
+  margin: 0;
+}
+.hub p {
+  line-height: 1.85;
+}
+.hub h2 {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: -0.5px;
+}
+.hub h3 {
+  font-size: 15px;
+  line-height: 1.5;
+}
+.hub small,
+.hub-fineprint {
+  color: var(--onSurfaceVariant);
+  font-size: 11px;
+  line-height: 1.8;
+}
+.hub a {
+  color: inherit;
+}
+.hub-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 48px;
+  position: relative;
+  padding: 12px 14px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 650;
+  text-decoration: none;
+  color: var(--primary) !important;
+  overflow: hidden;
+  transition:
+    background 0.2s,
+    transform 0.25s var(--motion-spring);
+}
+.hub-link:hover {
+  background: var(--primaryContainer);
+}
+.hub-link:active,
+.hub-tabs a:active,
+.ticket-row:active,
+.metric-card:active {
+  transform: scale(0.98);
+}
+.hub-link .icon {
+  transition: transform 0.3s var(--motion-spring);
+}
+.hub-link:hover .icon {
+  transform: translateX(3px);
+}
+.hub a:focus-visible,
+.hub-table-wrap:focus-visible,
+.hub summary:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 4px;
+}
+.hub-panel {
+  padding: 28px;
+  background: var(--surfaceContainerLow);
+  border: 1px solid var(--outlineVariant);
+  border-radius: 20px;
+  min-width: 0;
+}
+.hub-panel > h2:first-child {
+  margin-top: 0;
+}
+.help-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(260px, 1fr);
+  align-items: start;
+  gap: 28px;
+}
+.help-layout > *,
+.hub-form > * {
+  min-width: 0;
+}
+.help-aside {
+  background: var(--primaryContainer);
+  border-color: var(--primaryContainer);
+  color: var(--onPrimaryContainer);
+}
+.help-aside > small {
+  display: block;
+  margin-top: 24px;
+}
+.help-aside .hub-link {
+  display: flex;
+}
+.hub md-outlined-text-field,
+.hub md-outlined-select {
+  width: 100%;
+  --md-outlined-text-field-container-shape: 16px;
+  --md-outlined-select-text-field-container-shape: 16px;
+}
+.hub .hub-form {
+  display: grid;
+  gap: 20px;
+}
+.hub-form .hub-toolbar {
+  margin: 0;
+}
+.hub form > h2 {
+  margin-top: 0;
+}
+.hub form > p {
+  margin-bottom: 24px;
+}
+.hub .form-error:empty,
+#hub-status:empty {
+  display: none;
+}
+#hub-status {
+  color: var(--onTertiaryContainer);
+  background: var(--tertiaryContainer);
+  border-radius: 12px;
+  padding: 12px;
+}
+.hub-faq {
+  border-bottom: 1px solid var(--outlineVariant);
+  padding: 4px 0;
+}
+.hub-faq summary {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  justify-content: space-between;
+  padding: 22px 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 650;
+  border-radius: 12px;
+}
+.hub-faq summary::-webkit-details-marker {
+  display: none;
+}
+.hub-faq summary small {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--primary);
+}
+.hub-faq[open] summary > .icon {
+  transform: rotate(180deg);
+}
+.hub-faq p {
+  padding: 0 8px 20px;
+  margin: 0;
+  color: var(--onSurfaceVariant);
+  font-size: 13px;
+}
+.hub-faq summary > .icon {
+  transition: transform 0.3s var(--motion-out);
+}
+.hub-story {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.story-number {
+  font-size: 48px;
+  color: var(--primary);
+  font-weight: 700;
+  letter-spacing: -3px;
+}
+.hub-note {
+  margin: 28px 0;
+  padding: 32px;
+  background: var(--secondaryContainer);
+  border-radius: 20px;
+  color: var(--onSecondaryContainer);
+}
+.legal-layout {
+  display: grid;
+  gap: 24px;
+  max-width: 900px;
+  margin: auto;
+}
+.legal-layout p {
+  font-size: 14px;
+}
+.hub-definition {
+  margin: 20px 0;
+}
+.hub-definition > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  border-bottom: 1px solid var(--outlineVariant);
+  padding: 15px 0;
+}
+.hub-definition dt {
+  color: var(--onSurfaceVariant);
+  font-size: 12px;
+}
+.hub-definition dd {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 650;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+.hub-warning {
+  background: var(--errorContainer);
+  color: var(--onErrorContainer);
+  border-radius: 16px;
+  padding: 16px;
+  font-size: 12px !important;
+}
+.hub-loading,
+.hub-empty {
+  padding: 56px 24px;
+  text-align: center;
+}
+.hub-empty > .icon {
+  display: block;
+  margin: 0 auto 16px;
+  width: 36px;
+  height: 36px;
+  font-size: 36px;
+  color: var(--primary);
+}
+.hub-empty h2 {
+  font-size: 20px;
+}
+.hub-empty p {
+  font-size: 13px;
+  color: var(--onSurfaceVariant);
+}
+.admin-context {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 12px;
+}
+.admin-context > span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--primary);
+  font-weight: 650;
+}
+.hub-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 12px 0 16px;
+  border-bottom: 1px solid var(--outlineVariant);
+  margin-bottom: 32px;
+  scrollbar-width: thin;
+}
+.hub-tabs a {
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 24px;
+  padding: 15px 20px;
+  font-size: 12px;
+  font-weight: 650;
+  text-decoration: none;
+  transition:
+    background 0.25s,
+    transform 0.2s var(--motion-spring);
+}
+.hub-tabs a[aria-current] {
+  background: var(--secondaryContainer);
+  color: var(--onSecondaryContainer);
+}
+.hub-tabs a:hover {
+  background: var(--surfaceContainerHighest);
+}
+.admin-free {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px;
+  border-radius: 20px;
+  background: var(--tertiaryContainer);
+  color: var(--onTertiaryContainer);
+  margin: 0 0 24px;
+}
+.admin-free strong {
+  font-size: 15px;
+}
+.admin-free .icon {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 10px;
+}
+.admin-free p {
+  font-size: 12px;
+  margin: 10px 0 0;
+  max-width: 590px;
+}
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.metric-card {
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  display: grid;
+  padding: 24px;
+  background: var(--surfaceContainer);
+  border: 1px solid var(--outlineVariant);
+  border-radius: 20px;
+  transition:
+    transform 0.3s var(--motion-spring),
+    background 0.3s;
+}
+.metric-card:hover {
+  transform: translateY(-3px);
+  background: var(--primaryContainer);
+}
+.metric-card > span:first-child {
+  font-size: 12px;
+  color: var(--onSurfaceVariant);
+}
+.metric-card strong {
+  font-size: 44px;
+  line-height: 1.4;
+  letter-spacing: -2px;
+  font-weight: 750;
+}
+.metric-card .icon {
+  justify-self: end;
+  color: var(--primary);
+}
+.admin-lower {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.hub-filters {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 0 0 24px;
+}
+.hub-filters md-outlined-text-field {
+  flex: 1;
+  min-width: 160px;
+}
+.hub-filters md-outlined-select {
+  width: 210px;
+}
+.hub-filters md-outlined-button,
+.hub-filters md-text-button {
+  flex-shrink: 0;
+}
+.hub-table-wrap {
+  overflow-x: auto;
+  border-radius: 12px;
+}
+.hub-table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 580px;
+  text-align: left;
+  font-size: 12px;
+}
+.hub-table th {
+  font-size: 11px;
+  color: var(--onSurfaceVariant);
+  font-weight: 700;
+  border-bottom: 2px solid var(--outlineVariant);
+  padding: 10px 14px 18px;
+}
+.hub-table td {
+  padding: 22px 14px;
+  border-bottom: 1px solid var(--outlineVariant);
+  overflow-wrap: anywhere;
+  max-width: 310px;
+  vertical-align: top;
+}
+.hub-table tr:last-child td {
+  border-bottom: 0;
+}
+.hub-table td > span:not(.ticket-state),
+.hub-table td > small {
+  display: block;
+  margin-top: 6px;
+}
+.hub-table td > small {
+  font-size: 10px;
+}
+.hub-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 24px 0;
+  font-size: 11px;
+}
+.hub-pager span {
+  text-align: center;
+}
+.hub-toolbar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.ticket-list {
+  padding: 8px 24px;
+}
+.ticket-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px 8px;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  border-bottom: 1px solid var(--outlineVariant);
+  transition:
+    background 0.2s,
+    transform 0.2s var(--motion-spring);
+}
+.ticket-row:last-child {
+  border-bottom: 0;
+}
+.ticket-row > div {
+  flex: 1;
+  min-width: 0;
+}
+.ticket-row h3 {
+  margin: 0 0 6px;
+  overflow-wrap: anywhere;
+}
+.ticket-row p {
+  margin: 0 0 5px;
+  font-size: 12px;
+  color: var(--onSurfaceVariant);
+  overflow-wrap: anywhere;
+}
+.ticket-row:hover {
+  background: var(--surfaceContainer);
+}
+.ticket-state {
+  display: inline-flex;
+  border-radius: 12px;
+  background: var(--surfaceContainerHighest);
+  color: var(--onSurfaceVariant);
+  padding: 8px 12px;
+  font-size: 10px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.state-open {
+  background: var(--primaryContainer);
+  color: var(--onPrimaryContainer);
+}
+.state-waiting {
+  background: var(--tertiaryContainer);
+  color: var(--onTertiaryContainer);
+}
+.thread-context {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.thread-context p {
+  font-size: 12px;
+  margin: 0;
+}
+.thread-context small {
+  overflow-wrap: anywhere;
+}
+.thread-messages {
+  display: grid;
+  gap: 20px;
+}
+.thread-message {
+  width: 92%;
+  padding: 24px;
+  border: 1px solid var(--outlineVariant);
+  border-radius: 20px 20px 20px 4px;
+  background: var(--surfaceContainerLow);
+  min-width: 0;
+}
+.thread-message.from-support {
+  justify-self: end;
+  background: var(--secondaryContainer);
+  border-color: var(--secondaryContainer);
+  border-radius: 20px 20px 4px 20px;
+  color: var(--onSecondaryContainer);
+}
+.thread-message header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 12px;
+}
+.thread-message time {
+  font-size: 10px;
+}
+.thread-message p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  margin-bottom: 0;
+}
+.reply-panel {
+  margin-top: 32px;
+}
+.reply-panel .hub-toolbar {
+  margin: 24px 0 0;
+}
+.publisher-panel {
+  max-width: 760px;
+}
+.hub-public .hub {
+  padding-top: 0;
+}
+.hub-fineprint {
+  margin: 16px 0;
+}
+.public-footer nav {
+  flex-wrap: wrap;
+  gap: 12px 24px;
+}
+.footer {
+  flex-wrap: wrap;
+  gap: 16px;
+}
+@media (min-width: 951px) and (max-width: 1250px) {
+  .marketing-nav {
+    gap: 14px;
+  }
+  .public-header-actions {
+    gap: 12px;
+    margin-left: 0;
+  }
+  .public-header {
+    gap: 14px;
+  }
+  .brand-text {
+    font-size: 21px;
+  }
+}
+@media (max-width: 1150px) {
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .hub-story {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 950px) {
+  .help-layout {
+    grid-template-columns: 1fr;
+  }
+  .help-aside {
+    margin-top: 4px;
+  }
+  .hub-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .admin-lower {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 700px) {
+  .brand-text {
+    font-size: 21px;
+    letter-spacing: -0.9px;
+  }
+  .public-header-actions md-filled-button {
+    display: none;
+  }
+  .public-header-actions {
+    gap: 4px;
+  }
+  .mobile-title.wordmark .brand-text {
+    font-size: 18px;
+    letter-spacing: -0.8px;
+  }
+  .appbar {
+    gap: 8px;
+  }
+  .public-footer .brand-text {
+    font-size: 24px;
+  }
+  .hub-public {
+    width: calc(100% - 32px);
+    padding-block: 24px;
+  }
+  .hub {
+    padding-top: 16px;
+  }
+  .hub-heading {
+    margin-bottom: 24px;
+    gap: 16px;
+  }
+  .hub-heading h1 {
+    letter-spacing: -0.8px;
+  }
+  .hub-heading p {
+    font-size: 12px;
+  }
+  .hub-panel {
+    padding: 20px;
+  }
+  .hub-panel h2 {
+    font-size: 20px;
+  }
+  .hub-panel p {
+    font-size: 12px;
+  }
+  .hub-faq summary {
+    font-size: 14px;
+  }
+  .hub-filters {
+    flex-wrap: wrap;
+  }
+  .hub-filters md-outlined-text-field {
+    flex-basis: 100%;
+  }
+  .hub-filters md-outlined-select {
+    flex: 1;
+    width: auto;
+    min-width: 170px;
+  }
+  .hub-tabs {
+    margin-bottom: 24px;
+    margin-inline: -4px;
+  }
+  .hub-tabs a {
+    padding: 14px 16px;
+    font-size: 11px;
+  }
+  .admin-context {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0;
+  }
+  .admin-free {
+    padding: 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .admin-free strong {
+    font-size: 13px;
+  }
+  .metric-grid {
+    gap: 12px;
+  }
+  .metric-card {
+    padding: 20px 16px;
+  }
+  .metric-card strong {
+    font-size: 36px;
+  }
+  .metric-card > span:first-child {
+    font-size: 11px;
+  }
+  .ticket-list {
+    padding: 4px 16px;
+  }
+  .ticket-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+  }
+  .ticket-row > div {
+    grid-column: 1/-1;
+  }
+  .ticket-row > .icon {
+    justify-self: end;
+  }
+  .ticket-row > .ticket-state {
+    justify-self: start;
+  }
+  .hub-pager {
+    flex-wrap: wrap;
+  }
+  .hub-pager span {
+    order: -1;
+    width: 100%;
+  }
+  .thread-message {
+    width: 96%;
+    padding: 20px;
+  }
+  .thread-message header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .hub-definition > div {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .hub-definition dd {
+    text-align: left;
+  }
+  .hub-note {
+    padding: 24px 20px;
+  }
+}
+@media (max-width: 380px) {
+  .mobile-title.wordmark .brand-text {
+    font-size: 16px;
+  }
+  .brand-text {
+    font-size: 19px;
+  }
+  .appbar .top-actions {
+    gap: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hub *,
+  .hub *::before {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  .metric-card:hover,
+  .hub-link:active,
+  .ticket-row:active,
+  .hub-tabs a:active {
+    transform: none;
+  }
+}
+
+.account-id {
+  overflow-wrap: anywhere;
+  font-size: 11px;
+  line-height: 1.8;
+  color: var(--onSurfaceVariant);
+}

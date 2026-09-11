@@ -17,10 +17,11 @@ import "@material/web/progress/linear-progress.js";
 import { get, set, del } from "idb-keyval";
 import "./style.css";
 import { art, heroArt } from "./art";
-import { brandMark, wordmark } from "./brand";
+import { wordmark } from "./brand";
 import { landing, authPage, publicHeader, publicFooter } from "./public";
 import {
   checkPaymentStatus,
+  hasAccess,
   CheckoutError,
   type PaymentStatus,
 } from "./services/checkout";
@@ -29,9 +30,11 @@ import { merciPage, mountMerci } from "./pages/merci";
 import "./payments.css";
 import "./refinements.css";
 import "./expressive.css";
+import "./hub.css";
+import { hubPage, mountHub, isHubRoute, publicHubRoutes } from "./pages/hub";
 import { initSiteMotion } from "./services/motion";
 
-type User = { id: string; name: string; email: string };
+type User = { id: string; name: string; email: string; is_admin?: boolean };
 type CV = {
   id: string;
   name: string;
@@ -130,7 +133,8 @@ function isPublicRoute(r: string) {
     r.startsWith("welcome/") ||
     r === "login" ||
     r === "register" ||
-    r === "pricing"
+    r === "pricing" ||
+    publicHubRoutes.includes(r.split("?")[0])
   );
 }
 function nav(page: string, replace = false) {
@@ -169,7 +173,8 @@ async function applyRoute() {
       const status = await checkPaymentStatus();
       if (version !== gateVersion) return;
       payment = status;
-      if (!status.is_paid) {
+      if (user) user.is_admin = status.is_admin === true;
+      if (!hasAccess(status)) {
         cvs = [];
         sessions = [];
         dataLoaded = false;
@@ -314,7 +319,8 @@ async function refreshRecords() {
 }
 async function refresh() {
   payment = await checkPaymentStatus();
-  if (payment.is_paid) await refreshRecords();
+  if (user) user.is_admin = payment.is_admin === true;
+  if (hasAccess(payment)) await refreshRecords();
   else {
     cvs = [];
     sessions = [];
@@ -355,7 +361,8 @@ function requirePaid(next: () => void) {
       .then(async (status) => {
         if (user?.id !== id) return;
         payment = status;
-        if (!status.is_paid) {
+        if (user) user.is_admin = status.is_admin === true;
+        if (!hasAccess(status)) {
           cvs = [];
           sessions = [];
           dataLoaded = false;
@@ -391,7 +398,7 @@ function requireUser(next: () => void) {
   else openAuth("register", next);
 }
 function activeMain() {
-  const r = route();
+  const r = route().split("?")[0];
   return r.startsWith("session")
     ? "practice"
     : r.startsWith("results")
@@ -403,6 +410,14 @@ function sidebarLink(path: string, label: string, ico: string, count?: number) {
 }
 function shell(content: string) {
   const titles: Record<string, string> = {
+    admin: "Administration",
+    tickets: "Mes demandes",
+    support: "Support",
+    contact: "Contact",
+    about: "À propos",
+    legal: "Mentions légales",
+    privacy: "Confidentialité",
+    terms: "Conditions",
     home: "Mon espace",
     cv: "Mon CV",
     practice: "Mon entraînement",
@@ -414,12 +429,12 @@ function shell(content: string) {
     merci: "Confirmation du paiement",
   };
   const active = activeMain();
-  return `<div class="shell"><div class="mobile-scrim" data-act="menu-close"></div><aside class="sidebar" aria-label="Navigation principale">${wordmark("#home", "workspace-wordmark")}<div class="nav-caption">VOTRE ESPACE</div><nav>${sidebarLink("home", "Tableau de bord", "home")}${sidebarLink("cv", "Mon CV", "description", cvs.length)}${sidebarLink("practice", "M’entraîner", "forum")}${sidebarLink("history", "Mes entretiens", "history", sessions.length)}${sidebarLink("saved", "Mes favoris", "favorite")}${!payment?.is_paid ? sidebarLink("pricing", "Activer mon accès", "credit_card") : ""}</nav><div class="sidebar-bottom"><div class="side-note"><p>Votre prochain entretien</p><small>Choisissez un poste et préparez vos réponses.</small>${btn("Commencer", "start", "arrow_forward", "text")}</div>${sidebarLink("settings", "Paramètres", "settings")}<button class="nav-link" style="border:0;background:none;width:100%" data-act="help">${ripple}${icon("help")}Aide</button></div></aside><div class="main-wrap"><header class="appbar">${ib("menu", "Ouvrir le menu", "menu", 'class="mobile-menu"')}${wordmark("#home", "mobile-title")}<div class="breadcrumb">${icon("grid_view")}<span>Votre préparation</span>${icon("chevron_right")}<strong>${titles[active] ?? "Mon espace"}</strong></div><div class="top-actions">${ib("help", "Comment ça marche ?", "help", 'class="help-btn"')}<span class="divider"></span>${user ? `<span class="top-name">${esc(user.name)}</span><button class="avatar" data-act="profile" aria-label="Mon profil">${ripple}${esc(user.name.slice(0, 2).toUpperCase())}</button>` : btn("Se connecter", "login", "", "text")}${ib("more_vert", "Plus d’options", "more")}</div></header><main class="page ${backward ? "back" : ""}" id="main-content">${content}<footer class="footer"><a href="#welcome">Interview Prep AI ${icon("north_east")}</a><button data-act="privacy">Confidentialité ${icon("north_east")}</button></footer></main></div><nav class="bottom-nav" aria-label="Navigation mobile">${[
+  return `<div class="shell"><div class="mobile-scrim" data-act="menu-close"></div><aside class="sidebar" aria-label="Navigation principale">${wordmark("#home", "workspace-wordmark")}<div class="nav-caption">VOTRE ESPACE</div><nav>${sidebarLink("home", "Tableau de bord", "home")}${sidebarLink("cv", "Mon CV", "description", cvs.length)}${sidebarLink("practice", "M’entraîner", "forum")}${sidebarLink("history", "Mes entretiens", "history", sessions.length)}${sidebarLink("saved", "Mes favoris", "favorite")}${sidebarLink("tickets", "Mes demandes", "forum")}${user?.is_admin ? sidebarLink("admin", "Administration", "settings") : ""}${!hasAccess(payment) ? sidebarLink("pricing", "Activer mon accès", "credit_card") : ""}</nav><div class="sidebar-bottom"><div class="side-note"><p>Votre prochain entretien</p><small>Choisissez un poste et préparez vos réponses.</small>${btn("Commencer", "start", "arrow_forward", "text")}</div>${sidebarLink("settings", "Paramètres", "settings")}<button class="nav-link" style="border:0;background:none;width:100%" data-act="help">${ripple}${icon("help")}Aide</button></div></aside><div class="main-wrap"><header class="appbar">${ib("menu", "Ouvrir le menu", "menu", 'class="mobile-menu"')}${wordmark("#home", "mobile-title")}<div class="breadcrumb">${icon("grid_view")}<span>Votre préparation</span>${icon("chevron_right")}<strong>${titles[active] ?? "Mon espace"}</strong></div><div class="top-actions">${ib("help", "Comment ça marche ?", "help", 'class="help-btn"')}<span class="divider"></span>${user ? `<span class="top-name">${esc(user.name)}</span><button class="avatar" data-act="profile" aria-label="Mon profil">${ripple}${esc(user.name.slice(0, 2).toUpperCase())}</button>` : btn("Se connecter", "login", "", "text")}${ib("more_vert", "Plus d’options", "more")}</div></header><main class="page ${backward ? "back" : ""}" id="main-content">${content}<footer class="footer"><a href="#welcome">Interview Prep AI ${icon("north_east")}</a><a href="#support">Support</a><a href="#contact">Contact</a><a href="#legal">Mentions légales</a><a href="#privacy">Confidentialité</a><a href="#terms">Conditions</a></footer></main></div><nav class="bottom-nav" aria-label="Navigation mobile">${[
     ["home", "Accueil", "home"],
     ["search", "Recherche", "search"],
     ["saved", "Favoris", "favorite"],
     ["settings", "Réglages", "settings"],
-    ...(!payment?.is_paid ? [["pricing", "Accès", "credit_card"]] : []),
+    ...(!hasAccess(payment) ? [["pricing", "Accès", "credit_card"]] : []),
   ]
     .map(
       ([path, label, ico]) =>
@@ -427,7 +442,7 @@ function shell(content: string) {
     )
     .join(
       "",
-    )}</nav>${!route().startsWith("session/") ? `<div class="fab-wrap"><div class="fab-items" hidden>${btn("Importer un CV", "upload", "upload_file", "filled-tonal")}${btn("Écrire une note", "new-note", "edit", "filled-tonal")}</div><md-fab aria-label="Créer ou importer" aria-expanded="false" data-act="fab">${mi("add")}</md-fab></div>` : ""}</div>`;
+    )}</nav>${!route().startsWith("session/") && !isHubRoute(route()) ? `<div class="fab-wrap"><div class="fab-items" hidden>${btn("Importer un CV", "upload", "upload_file", "filled-tonal")}${btn("Écrire une note", "new-note", "edit", "filled-tonal")}</div><md-fab aria-label="Créer ou importer" aria-expanded="false" data-act="fab">${mi("add")}</md-fab></div>` : ""}</div>`;
 }
 function pageTitle(
   eyebrow: string,
@@ -444,7 +459,7 @@ function home() {
   const done = sessions.filter((s) => s.result),
     ongoing = sessions.find((s) => !s.result);
   const steps = [cvs.length > 0, sessions.length > 0, done.length > 0];
-  return `${!payment?.is_paid ? `<aside class="access-banner"><p>L’analyse des CV et les entretiens nécessitent un accès actif. ${payment === null ? "Son état n’a pas pu être vérifié." : "Votre accès n’est pas encore activé."}</p><div>${btn("Voir le tarif", "go-pricing", "", "filled-tonal")}${btn("J’ai déjà payé", "go-merci", "", "text")}</div></aside>` : ""}<section class="welcome"><div><h1>Bonjour, ${esc(user?.name.split(" ")[0])}.</h1><p>Retrouvez vos CV, vos entretiens et vos bilans.</p></div><md-outlined-text-field id="home-search" type="search" label="Rechercher">${mi("search").replace('slot="icon"', 'slot="leading-icon"')}${ib("arrow_forward", "Lancer la recherche", "home-search", 'slot="trailing-icon"')}</md-outlined-text-field></section><section class="hero"><div class="hero-copy"><div class="eyebrow">VOTRE PROCHAIN ENTRETIEN</div><h2>Votre expérience.<br><em>Les mots pour la défendre.</em></h2><p>Préparez vos réponses à partir de votre CV.<br>Choisissez un poste, répondez aux questions<br class="desktop-break"> et identifiez les points à travailler.</p><div>${btn(ongoing ? "Reprendre mon entretien" : cvs.length ? "Préparer un entretien" : "Importer mon CV", ongoing ? "resume" : cvs.length ? "start" : "upload", ongoing ? "play_arrow" : cvs.length ? "arrow_forward" : "upload_file")}<span class="hero-note">${icon("pace")}Sans chronomètre</span></div></div><div class="hero-art">${heroArt()}</div></section><div class="workspace"><section><div class="section-heading"><h2>Votre préparation</h2></div><div class="quick-grid">${[
+  return `${!hasAccess(payment) ? `<aside class="access-banner"><p>L’analyse des CV et les entretiens nécessitent un accès actif. ${payment === null ? "Son état n’a pas pu être vérifié." : "Votre accès n’est pas encore activé."}</p><div>${btn("Voir le tarif", "go-pricing", "", "filled-tonal")}${btn("J’ai déjà payé", "go-merci", "", "text")}</div></aside>` : ""}<section class="welcome"><div><h1>Bonjour, ${esc(user?.name.split(" ")[0])}.</h1><p>Retrouvez vos CV, vos entretiens et vos bilans.</p></div><md-outlined-text-field id="home-search" type="search" label="Rechercher">${mi("search").replace('slot="icon"', 'slot="leading-icon"')}${ib("arrow_forward", "Lancer la recherche", "home-search", 'slot="trailing-icon"')}</md-outlined-text-field></section><section class="hero"><div class="hero-copy"><div class="eyebrow">VOTRE PROCHAIN ENTRETIEN</div><h2>Votre expérience.<br><em>Les mots pour la défendre.</em></h2><p>Préparez vos réponses à partir de votre CV.<br>Choisissez un poste, répondez aux questions<br class="desktop-break"> et identifiez les points à travailler.</p><div>${btn(ongoing ? "Reprendre mon entretien" : cvs.length ? "Préparer un entretien" : "Importer mon CV", ongoing ? "resume" : cvs.length ? "start" : "upload", ongoing ? "play_arrow" : cvs.length ? "arrow_forward" : "upload_file")}<span class="hero-note">${icon("pace")}Sans chronomètre</span></div></div><div class="hero-art">${heroArt()}</div></section><div class="workspace"><section><div class="section-heading"><h2>Votre préparation</h2></div><div class="quick-grid">${[
     [
       "01",
       "Mes CV",
@@ -580,7 +595,7 @@ function noteCard(n: Note) {
   return `<article class="note-card"><h3>${esc(n.title)}</h3><p>${rich(n.body)}</p><div class="actions-row"><small>${date(n.updatedAt)}</small><span>${ib("edit", "Modifier cette note", "edit-note", `data-id="${n.id}"`)}${ib("delete", "Supprimer cette note", "delete-note", `data-id="${n.id}"`)}</span></div></article>`;
 }
 function settingsPage() {
-  return `${pageTitle("VOTRE COMPTE", "Paramètres", "Gérez votre profil, vos préférences et vos données.")}<div class="two-col"><div class="stack"><section class="panel"><h2>Votre profil</h2>${user ? `<div class="list-row" style="padding-left:0"><span class="lead">${icon("person")}</span><div class="grow"><h3>${esc(user.name)}</h3><p>${esc(user.email)}</p></div>${ib("edit", "Modifier mon nom", "edit-profile")}</div>${btn("Se déconnecter", "logout", "logout", "text")}` : `<p>Créez votre compte pour retrouver vos CV et entretiens sur vos appareils.</p><div class="section-space">${btn("Créer mon compte", "register", "person_add")}</div>`}</section><section class="panel"><h2>Préférences</h2><div class="settings-row"><div><h3>Confirmations d’enregistrement</h3><p>Afficher un message après l’enregistrement d’une note ou d’un favori.</p></div><md-switch id="notifications" ${local.notifications ? "selected" : ""} aria-label="Confirmations d’enregistrement"></md-switch></div><div class="settings-row"><div><h3>Langue des entretiens</h3><p>Questions et bilans en français.</p></div><span class="badge">Français</span></div></section></div><div class="stack"><section class="panel"><h2>Gestion des données</h2><p>CV analysés et entretiens sont liés à votre compte sur le serveur. Notes, favoris et brouillons restent sur cet appareil.</p><div class="settings-row"><div><h3>Exporter mes données</h3><p>Exporter vos données dans un fichier JSON.</p></div>${ib("download", "Exporter mes données", "export-all")}</div><div class="settings-row"><div><h3>Effacer les données locales</h3><p>Supprime les notes, favoris et brouillons sur cet appareil.</p></div>${ib("delete_sweep", "Effacer mes données locales", "clear-local")}</div>${user ? `<div class="section-space">${btn("Supprimer mon compte", "delete-account", "delete_forever", "text", 'class="danger"')}</div>` : ""}</section><div class="privacy-box">${icon("shield")}<span>Consultez les modalités de traitement de votre CV, la conservation des données et les options de suppression. ${btn("En savoir plus", "privacy", "", "text")}</span></div></div></div>`;
+  return `${pageTitle("VOTRE COMPTE", "Paramètres", "Gérez votre profil, vos préférences et vos données.")}<div class="two-col"><div class="stack"><section class="panel"><h2>Votre profil</h2>${user?.is_admin ? `<p>Administrateur · accès gratuit aux créations.</p><a class="hub-link" href="#admin">Ouvrir l’administration</a>` : ""}${user ? `<div class="list-row" style="padding-left:0"><span class="lead">${icon("person")}</span><div class="grow"><h3>${esc(user.name)}</h3><p>${esc(user.email)}</p></div>${ib("edit", "Modifier mon nom", "edit-profile")}</div><p class="account-id"><small>Identifiant de ce compte</small><br><span>${esc(user.id)}</span></p>${btn("Se déconnecter", "logout", "logout", "text")}` : `<p>Créez votre compte pour retrouver vos CV et entretiens sur vos appareils.</p><div class="section-space">${btn("Créer mon compte", "register", "person_add")}</div>`}</section><section class="panel"><h2>Préférences</h2><div class="settings-row"><div><h3>Confirmations d’enregistrement</h3><p>Afficher un message après l’enregistrement d’une note ou d’un favori.</p></div><md-switch id="notifications" ${local.notifications ? "selected" : ""} aria-label="Confirmations d’enregistrement"></md-switch></div><div class="settings-row"><div><h3>Langue des entretiens</h3><p>Questions et bilans en français.</p></div><span class="badge">Français</span></div></section></div><div class="stack"><section class="panel"><h2>Gestion des données</h2><a class="hub-link" href="#tickets">Mes demandes et export du support</a><p>CV analysés et entretiens sont liés à votre compte sur le serveur. Notes, favoris et brouillons restent sur cet appareil.</p><div class="settings-row"><div><h3>Exporter mes données</h3><p>Exporter vos données dans un fichier JSON.</p></div>${ib("download", "Exporter mes données", "export-all")}</div><div class="settings-row"><div><h3>Effacer les données locales</h3><p>Supprime les notes, favoris et brouillons sur cet appareil.</p></div>${ib("delete_sweep", "Effacer mes données locales", "clear-local")}</div>${user ? `<div class="section-space">${btn("Supprimer mon compte", "delete-account", "delete_forever", "text", 'class="danger"')}</div>` : ""}</section><div class="privacy-box">${icon("shield")}<span>Consultez les modalités de traitement de votre CV, la conservation des données et les options de suppression. ${btn("En savoir plus", "privacy", "", "text")}</span></div></div></div>`;
 }
 function searchPage() {
   return `${pageTitle("RETROUVER L’ESSENTIEL", "Rechercher dans mon espace", "Un CV, un entretien ou une idée notée en passant.")}<md-outlined-text-field type="search" class="search-large" id="global-search" label="Rechercher dans mes CV, entretiens et notes" value="${esc(search)}">${mi("search").replace('slot="icon"', 'slot="leading-icon"')}</md-outlined-text-field><div id="search-results">${searchResults()}</div>`;
@@ -634,6 +649,20 @@ function render() {
       '<md-circular-progress indeterminate aria-label="Chargement de votre espace"></md-circular-progress><p>Chargement de votre espace…</p></main>';
     return;
   }
+  if (isHubRoute(r)) {
+    const content = hubPage();
+    app.innerHTML = user
+      ? shell(content)
+      : `<div class="public-site">${publicHeader(false)}<main class="public-width hub-public" id="main-content">${content}</main>${publicFooter()}</div>`;
+    disposePaymentPage = mountHub(
+      document.querySelector<HTMLElement>("#hub-root")!,
+      r,
+      user,
+      (page) => nav(page),
+      paymentAuthExpired,
+    );
+    return;
+  }
   if (r === "pricing") {
     const content = pricingPage(user, payment);
     app.innerHTML = user
@@ -650,7 +679,7 @@ function render() {
         onCompleted: async (step) => {
           await refresh();
           nav("home");
-          if (step === "completed" && !payment?.is_paid)
+          if (step === "completed" && !hasAccess(payment))
             toast(
               "La confirmation est en cours. Retrouvez son état dans la page de confirmation.",
             );
@@ -673,6 +702,10 @@ function render() {
     return;
   }
   if (r === "merci") {
+    if (payment?.is_admin && hasAccess(payment)) {
+      app.innerHTML = shell(pricingPage(user, payment));
+      return;
+    }
     app.innerHTML = shell(merciPage(payment));
     disposePaymentPage = mountMerci(
       document.querySelector<HTMLElement>("#merci-page")!,
@@ -680,6 +713,7 @@ function render() {
       {
         onConfirmed: (status) => {
           payment = status;
+          if (user) user.is_admin = status.is_admin === true;
           void refreshRecords()
             .then(() => {
               if (route() === "merci") render();
@@ -910,7 +944,7 @@ function openHelp() {
 function openPrivacy() {
   modal(
     "Confidentialité et traitement des données",
-    `<div class="stack"><p class="modal-intro" style="margin:0">Les données sont utilisées pour gérer votre compte et préparer vos entretiens.</p><div><h3>Votre CV et vos réponses</h3><p class="modal-intro">Avec votre accord, le PDF est envoyé à l’API Google Gemini. L’analyse, les questions, vos réponses validées et les bilans sont conservés sur le serveur, dans votre compte. Le PDF original n’est pas conservé.</p></div><div><h3>Votre compte et votre paiement</h3><p class="modal-intro">Vos données de compte et de préparation sont conservées dans une base PostgreSQL hébergée sur Supabase. Si vous initiez un paiement, votre nom, votre e-mail, votre téléphone et l’identifiant de votre compte sont transmis à Chariow. Les données de carte sont saisies uniquement chez le prestataire. Nous conservons une référence de vente et une date d’activation, jamais vos coordonnées de carte. Après suppression du compte, la référence de vente désassociée est conservée pour empêcher la réutilisation du paiement.</p></div><div><h3>Dans ce navigateur</h3><p class="modal-intro">Vos notes, favoris, préférences et brouillons sont stockés localement via IndexedDB, par compte. Vous pouvez les exporter ou les effacer dans les réglages.</p></div><div><h3>Google Gemini</h3><p class="modal-intro">Le traitement dépend des conditions et du niveau de service du compte Google utilisé par l’administrateur. Retirez les coordonnées et données sensibles inutiles. <a class="inline-link" href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noopener noreferrer">Lire les conditions de Google Gemini</a>.</p></div><div><h3>Vous gardez la main</h3><p class="modal-intro">Supprimez vos CV et entretiens individuellement, ou votre compte et ses données dans les réglages. Les bilans IA peuvent être inexacts et ne prédisent pas vos chances d’embauche.</p></div></div>`,
+    `<div class="stack"><p class="modal-intro" style="margin:0">Les données sont utilisées pour gérer votre compte et préparer vos entretiens.</p><div><h3>Votre CV et vos réponses</h3><p class="modal-intro">Avec votre accord, le PDF est envoyé à l’API Google Gemini. L’analyse, les questions, vos réponses validées et les bilans sont conservés sur le serveur, dans votre compte. Le PDF original n’est pas conservé.</p></div><div><h3>Votre compte et votre paiement</h3><p class="modal-intro">Vos données de compte et de préparation sont conservées dans une base PostgreSQL hébergée sur Supabase. Si vous initiez un paiement, votre nom, votre e-mail, votre téléphone et l’identifiant de votre compte sont transmis à Chariow. Les données de carte sont saisies uniquement chez le prestataire. Nous conservons une référence de vente et une date d’activation, jamais vos coordonnées de carte. Après suppression du compte, la référence de vente désassociée est conservée pour empêcher la réutilisation du paiement.</p></div><div><h3>Dans ce navigateur</h3><p class="modal-intro">Vos notes, favoris, préférences et brouillons sont stockés localement via IndexedDB, par compte. Vous pouvez les exporter ou les effacer dans les réglages.</p></div><div><h3>Google Gemini</h3><p class="modal-intro">Le traitement dépend des conditions et du niveau de service du compte Google utilisé par l’administrateur. Retirez les coordonnées et données sensibles inutiles. <a class="inline-link" href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noopener noreferrer">Lire les conditions de Google Gemini</a>.</p></div><div><h3>Messagerie de support</h3><p class="modal-intro">Vos demandes et les réponses sont enregistrées en base et accessibles à votre compte et à l’administrateur. Aucun e-mail de notification n’est envoyé. La suppression du compte supprime aussi ses demandes.</p></div><div><h3>Vous gardez la main</h3><p class="modal-intro">Supprimez vos CV et entretiens individuellement, ou votre compte et ses données dans les réglages. Les bilans IA peuvent être inexacts et ne prédisent pas vos chances d’embauche.</p></div></div>`,
   );
 }
 let confirmFn: (() => Promise<void>) | null = null;
@@ -1071,13 +1105,14 @@ async function action(act: string, el: HTMLElement) {
       closeModal();
       break;
     case "help":
-      openHelp();
+      nav("support");
       break;
     case "retry-payment":
       void applyRoute();
       break;
     case "privacy":
-      openPrivacy();
+      if (route() === "login" || route() === "register") openPrivacy();
+      else nav("privacy");
       break;
     case "profile":
       nav("settings");

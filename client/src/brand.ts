@@ -1,8 +1,7 @@
-// Bespoke interview mark: two people, one table, a shared conversation.
-// All app colours resolve through the Material scheme roles.
+// Pure typographic identity. No symbol, medallion, AI badge, or outlined pictogram.
 export function brandMark() {
-  return `<svg class="brand-symbol" data-brand="conversation" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="64" height="64" rx="20" fill="var(--primary, #8B5000)"/><g class="brand-conversation"><path d="M25 10h17a6 6 0 0 1 6 6v2a6 6 0 0 1-6 6h-8l-6 5v-5h-3a6 6 0 0 1-6-6v-2a6 6 0 0 1 6-6Z" fill="var(--primaryContainer, #FFDCC2)"/><path d="M27 17h13" stroke="var(--primary, #8B5000)" stroke-width="2.8" stroke-linecap="round"/></g><g class="brand-person"><circle cx="17" cy="32" r="4.5" fill="var(--onPrimary, #FFFFFF)"/><path d="M9 50v-6a8 8 0 0 1 14.3-4.9L28 44" stroke="var(--onPrimary, #FFFFFF)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></g><g class="brand-person"><circle cx="47" cy="32" r="4.5" fill="var(--onPrimary, #FFFFFF)"/><path d="M55 50v-6a8 8 0 0 0-14.3-4.9L36 44" stroke="var(--onPrimary, #FFFFFF)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M24 45h16M32 45v10" stroke="var(--primaryContainer, #FFDCC2)" stroke-width="3" stroke-linecap="round"/></svg>`;
+  return `<span class="brand-text" data-brand="typographic">Interview Prep AI</span>`;
 }
 export function wordmark(href = "#welcome", extra = "") {
-  return `<a class="wordmark ${extra}" href="${href}" aria-label="Interview Prep AI — accueil">${brandMark()}<span class="wordmark-name">Interview<span>Prep<span class="wordmark-ai">AI</span></span></span></a>`;
+  return `<a class="wordmark ${extra}" href="${href}" aria-label="Interview Prep AI — accueil">${brandMark()}</a>`;
 }

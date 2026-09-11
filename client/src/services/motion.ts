@@ -2,9 +2,9 @@ import { animate } from "motion/mini";
 
 const ease: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const revealSelector =
-  ".method-card, .benefits-list article, .quick-card, .journey, .practice-card, .pricing-offer, .pricing-form-card, .payment-confirmed, .notes-grid > *, .list > *, .closing-cta, .faq-list details";
+  ".method-card, .benefits-list article, .quick-card, .journey, .practice-card, .pricing-offer, .pricing-form-card, .payment-confirmed, .notes-grid > *, .list > *, .closing-cta, .faq-list details, .hub-panel, .metric-card, .thread-message";
 const hoverSelector =
-  ".quick-card, .method-card, .practice-card, .pricing-offer";
+  ".quick-card, .method-card, .practice-card, .pricing-offer, .metric-card";
 
 // Progressive enhancement only. Content is never hidden waiting for JS or an observer.
 // No cloned screens (especially not account/payment forms), no scroll hijacking.
@@ -83,7 +83,7 @@ export function initSiteMotion(root: HTMLElement): () => void {
     // already implement their own ripple. No extra interactive elements are added.
     root
       .querySelectorAll<HTMLElement>(
-        ".wordmark, .marketing-nav a, .login-link, .method-link, .text-arrow, .public-footer a, .public-footer button, .footer a, .footer button, .privacy-text-link, .faq-list summary",
+        ".wordmark, .marketing-nav a, .login-link, .method-link, .text-arrow, .public-footer a, .public-footer button, .footer a, .footer button, .privacy-text-link, .faq-list summary, .hub-link, .hub-tabs a, .ticket-row, .metric-card",
       )
       .forEach((el) => {
         el.classList.add("motion-tap");
@@ -113,7 +113,7 @@ export function initSiteMotion(root: HTMLElement): () => void {
       const backward =
         page?.classList.contains("back") || root.dataset.direction === "back";
       const leads = root.querySelectorAll<HTMLElement>(
-        ".landing-copy > *, .landing-visual, .auth-editorial > :not(.auth-editorial-art), .auth-card, .page-title, .welcome, .hero, .payment-heading, .payment-gate",
+        ".landing-copy > *, .landing-visual, .auth-editorial > :not(.auth-editorial-art), .auth-card, .page-title, .welcome, .hero, .payment-heading, .payment-gate, .hub-heading, .admin-context",
       );
       leads.forEach((el, i) =>
         enter(el, Math.min(i, 6) * 0.065, backward, 0.6),
@@ -210,6 +210,11 @@ export function initSiteMotion(root: HTMLElement): () => void {
       mount();
     }
   }
+  const viewReady = () => {
+    lastRoute = "";
+    mount();
+  };
+  root.addEventListener("prep:view-ready", viewReady);
   const mutation = new MutationObserver(mount);
   mutation.observe(root, { childList: true });
   root.addEventListener("pointermove", move, { passive: true });
@@ -223,6 +228,7 @@ export function initSiteMotion(root: HTMLElement): () => void {
   return () => {
     disposed = true;
     mutation.disconnect();
+    root.removeEventListener("prep:view-ready", viewReady);
     clearView();
     cancelAnimationFrame(frame);
     root.removeEventListener("pointermove", move);

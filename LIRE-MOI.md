@@ -1,5 +1,14 @@
-# Interview Prep AI — v3
+# Interview Prep AI — v5
+
+> **V5 — Support et administration.** Lisez d’abord `docs/MISE-A-JOUR-V5.md`. Pour votre site existant : exécuter `database/migration-v5.sql`, déposer le correctif GitHub, puis renseigner `Admin__UserId` dans Render. Pour une installation neuve : utiliser le fichier **`database/schema.sql` actuel**, pas l’ancien extrait SQL reproduit dans le guide historique ci-dessous. La v5 ajoute trois tables. Le compte admin a un accès gratuit distinct du paiement. Les tests actuels (213), leurs limites et la compilation sont dans `BUILD-V5.txt`.
+
+> Les sections v3/v3.1/v4 ci-dessous restent une référence pour le déploiement, TLS et les prestataires ; leurs noms d’archives, décomptes et périmètres décrivent des versions antérieures. Les instructions v5 ci-dessus priment pour cette livraison.
+
+> **V4 visuelle — 11 septembre 2026.** Pour mettre à jour le site déjà fonctionnel, suivez `docs/MISE-A-JOUR-V4.md` et utilisez le ZIP de mise à jour visuelle (sans changement de serveur, de SQL ou de secrets). Nouvelle marque, nouvelle illustration et Motion 13.2.0 ; 165 tests réussis, sortie dans `BUILD-V4.txt`. Le guide technique ci-dessous reste applicable au backend v3.1 conservé.
+
 ## PostgreSQL Supabase · Paiement Chariow · Préparation Render
+
+> **Mise à jour du 11 septembre 2026 — correctif v3.1.** Voir `docs/CORRECTIF-CHARIOW.md` : paramètre de livraison Chariow optionnel et icône Accès corrigés ; 153 tests réussis (92 .NET, 56 DOM, 5 migration). La sortie de ce correctif historique est dans `BUILD-CORRECTIF-CHARIOW.txt`. Les nombres et observations ci-dessous décrivent la livraison v3 initiale.
 
 **Livraison du 8 septembre 2026.** Application française, thème Amber clair, composants Material Web, Roboto Serif et logo propre au produit. Aucun CV, entretien ou paiement de démonstration n’est préchargé.
 
@@ -36,6 +45,9 @@ Host=HOTE_DU_SESSION_POOLER;Port=5432;Database=postgres;Username=postgres.REFERE
 Les éléments en majuscules sont des **valeurs à remplacer**, pas des identifiants fournis. Les guillemets de `Password` sont utiles si le mot de passe contient un point-virgule ; utilisez l’échappement Npgsql si le mot de passe contient lui-même des guillemets.
 
 5. Dans Render, placez cette chaîne dans `Supabase__ConnectionString`.
+
+**Certificat pour VerifyFull (correctif SSL intégré au Dockerfile v3.1).** Dans Supabase → Database → Settings → SSL Configuration, téléchargez le certificat CA officiel. Dans Render → Environment → Secret Files, créez **supabase-ca.crt** et collez tout son contenu PEM (BEGIN/END CERTIFICATE inclus). Le Dockerfile fixe `PGSSLROOTCERT=/etc/secrets/supabase-ca.crt` ; Npgsql lit ce chemin. L'utilisateur non-root `app:1000` peut lire les fichiers secrets Render. Conservez `SSL Mode=VerifyFull` et n'ajoutez pas `Trust Server Certificate=true`. Le fichier CA n'est pas fourni dans l'archive : prenez celui de Supabase. Cette étape complète les instructions de la livraison initiale.
+
 
 **Important :** le pooler transactionnel 6543 a d’autres contraintes, notamment sur les prepared statements. Cette configuration est préparée pour le **session pooler 5432**. La connexion directe peut nécessiter IPv6. Conservez TLS et la validation de certificat ; `VerifyFull` est recommandé. Le serveur refuse les modes Disable/Allow/Prefer en Production. `Require` chiffre mais ne valide pas pleinement l’identité du serveur : ce n’est pas la recommandation de ce guide.
 
@@ -346,4 +358,4 @@ Documentation consultée pour cette intégration ; les interfaces/offres des pre
 - [Supabase — connexions PostgreSQL et poolers](https://supabase.com/docs/guides/database/connecting-to-postgres)
 - [Render — services gratuits et limites](https://render.com/docs/free)
 
-Licences des polices, icônes, composants et fournisseur PostgreSQL dans `licenses/`. Les illustrations et le logo de l’application restent les assets personnalisés livrés en v2.
+Licences des polices, icônes, composants et fournisseur PostgreSQL dans `licenses/`. La v4 remplace le logo et l’illustration principale par une identité représentant un entretien. Les autres illustrations de préparation sont conservées. Les licences Motion/MIT sont également incluses.

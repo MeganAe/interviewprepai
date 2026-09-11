@@ -1,6 +1,7 @@
 import "@material/web/textfield/filled-text-field.js";
 import {
   CheckoutError,
+  hasAccess,
   getOffer,
   initiateCheckout,
   validateCustomer,
@@ -19,6 +20,8 @@ const icon = (name: string) =>
   `<span class="icon" aria-hidden="true">${name}</span>`;
 type User = { name: string; email: string };
 export function pricingPage(user: User | null, status: PaymentStatus | null) {
+  if (status?.is_admin && hasAccess(status))
+    return `<section class="payment-page"><div class="payment-heading"><div class="eyebrow">VOTRE COMPTE ADMIN</div><h1>Votre accès est inclus.</h1><p>Vous pouvez analyser vos CV et créer des entretiens sans paiement. Les quotas du fournisseur d’IA restent applicables.</p></div><div class="payment-confirmed"><h2>Accès administrateur gratuit</h2><p>Aucun achat n’est nécessaire et aucun paiement fictif n’est enregistré.</p><md-filled-button data-act="go-home">Retrouver mon espace</md-filled-button><a class="hub-link" href="#admin">Ouvrir l’administration</a></div></section>`;
   if (status?.is_paid)
     return `<section class="payment-page"><div class="payment-heading"><div class="eyebrow">VOTRE ACCÈS</div><h1>Votre préparation est activée.</h1><p>Vous pouvez analyser vos CV et préparer vos entretiens.</p></div><div class="payment-confirmed">${icon("verified")}<h2>Accès actif</h2>${status.paid_at ? `<p>Activé le ${esc(new Date(status.paid_at).toLocaleDateString("fr-FR"))}.</p>` : ""}<md-filled-button data-act="go-home">Retrouver mon espace</md-filled-button></div></section>`;
   const names = user?.name.trim().split(/\s+/) ?? [];

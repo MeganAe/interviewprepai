@@ -1,4 +1,11 @@
-export type PaymentStatus = { is_paid: boolean; paid_at: string | null };
+export type PaymentStatus = {
+  is_paid: boolean;
+  paid_at: string | null;
+  is_admin?: boolean;
+  has_access?: boolean;
+};
+export const hasAccess = (s: PaymentStatus | null | undefined) =>
+  s?.is_paid === true || (s?.is_admin === true && s?.has_access === true);
 export type CheckoutCustomer = {
   firstName: string;
   lastName: string;
@@ -7,7 +14,7 @@ export type CheckoutCustomer = {
   countryCode: string;
 };
 export type CheckoutStep = {
-  step: "payment" | "completed" | "already_paid";
+  step: "payment" | "completed" | "already_paid" | "admin_access";
   checkout_url: string | null;
 };
 export type Offer = {
@@ -83,7 +90,12 @@ export async function initiateCheckout(
     signal,
   );
   const data = response.data;
-  if (!data || !["payment", "completed", "already_paid"].includes(data.step))
+  if (
+    !data ||
+    !["payment", "completed", "already_paid", "admin_access"].includes(
+      data.step,
+    )
+  )
     throw new CheckoutError(
       "Réponse de paiement invalide.",
       502,
@@ -118,6 +130,9 @@ export async function checkPaymentStatus(
   const result = await request("/status", {}, signal);
   if (
     typeof result.is_paid !== "boolean" ||
+    (result.is_admin !== undefined && typeof result.is_admin !== "boolean") ||
+    (result.has_access !== undefined &&
+      typeof result.has_access !== "boolean") ||
     (result.paid_at !== null && typeof result.paid_at !== "string")
   )
     throw new CheckoutError(
