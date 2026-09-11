@@ -15,12 +15,16 @@ COPY server/ ./server/
 RUN dotnet publish server/server.csproj -c Release -r linux-x64 --self-contained false --no-restore -o /publish /p:UseAppHost=false
 
 # Stage 2: no SDK, Node, source files, local database or credentials in the runtime.
+# Add the official Supabase CA as Render Secret File: supabase-ca.crt.
+# Npgsql 8 reads PGSSLROOTCERT; keep SSL Mode=VerifyFull in the connection string.
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 COPY --from=build /publish/ ./
 COPY licenses/ ./licenses/
 ENV ASPNETCORE_ENVIRONMENT=Production \
-    ASPNETCORE_URLS=http://0.0.0.0:10000
+    ASPNETCORE_URLS=http://0.0.0.0:10000 \
+    PGSSLROOTCERT=/etc/secrets/supabase-ca.crt
 EXPOSE 10000
-USER app
+# Render secret files are readable by group 1000. Keep the non-root app UID.
+USER app:1000
 ENTRYPOINT ["dotnet", "server.dll"]
