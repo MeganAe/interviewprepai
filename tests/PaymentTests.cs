@@ -52,9 +52,32 @@ public sealed class PaymentTests:IDisposable {
     [Fact] public async Task CheckoutConcurrentRequestsReuseSingleProviderSession(){var(c,id,email)=await Account();using(c){var replies=await Task.WhenAll(Enumerable.Range(0,6).Select(_=>c.PostAsJsonAsync("/api/checkout",Customer(email))));Assert.All(replies,r=>Assert.Equal(HttpStatusCode.OK,r.StatusCode));Assert.Equal(1,provider.Checkouts);Assert.False(User(id).IsPaid);}}
     [Fact] public async Task OnlyPostPulseIsExemptFromCsrf(){using var c=Client(false);Assert.Equal(HttpStatusCode.Forbidden,(await c.PutAsJsonAsync("/api/pulse",new{})).StatusCode);}
     [Theory][InlineData("shipping",502)][InlineData("fields",503)][InlineData("pricing",502)][InlineData("draft",503)]
-    public async Task UnsupportedOrMalformedProductFailsSafely(string scenario,int status){provider.ProductOverride=JsonNode.Parse("{\"id\":\"prd_unit_test\",\"name\":\"Test\",\"status\":\"published\",\"type\":\"license\",\"settings\":{\"is_requires_shipping_address\":false},\"pricing\":{\"type\":\"one_time\",\"current_price\":{\"value\":29,\"formatted\":\"29 EUR\",\"currency\":\"EUR\"}}}")!.AsObject();switch(scenario){case "shipping":provider.ProductOverride["settings"]!["is_requires_shipping_address"]="false";break;case "fields":provider.ProductOverride["fields"]=new JsonArray("unsupported");break;case "pricing":provider.ProductOverride["pricing"]="wrong shape";break;case "draft":provider.ProductOverride["status"]="draft";break;}using var c=Client();Assert.Equal((HttpStatusCode)status,(await c.GetAsync("/api/checkout/offer")).StatusCode);}
+    public async Task UnsupportedOrMalformedProductFailsSafely(string scenario,int status){provider.ProductOverride=JsonNode.Parse("{\"id\":\"prd_unit_test\",\"name\":\"Test\",\"status\":\"published\",\"type\":\"license\",\"settings\":{\"is_requires_shipping_address\":false},\"pricing\":{\"type\":\"one_time\",\"current_price\":{\"value\":29,\"formatted\":\"29 EUR\",\"currency\":\"EUR\"}}}")!.AsObject();switch(scenario){case "shipping":provider.ProductOverride["settings"]!["is_requires_shipping_address"]="not-a-boolean";break;case "fields":provider.ProductOverride["fields"]=new JsonArray("unsupported");break;case "pricing":provider.ProductOverride["pricing"]="wrong shape";break;case "draft":provider.ProductOverride["status"]="draft";break;}using var c=Client();Assert.Equal((HttpStatusCode)status,(await c.GetAsync("/api/checkout/offer")).StatusCode);}
     [Fact] public async Task MalformedCheckoutPaymentIs502NotAnUnhandled500(){provider.CheckoutOverride=new JsonObject{["step"]="payment",["payment"]="wrong shape"};var(c,id,email)=await Account();using(c){Assert.Equal(HttpStatusCode.BadGateway,(await c.PostAsJsonAsync("/api/checkout",Customer(email))).StatusCode);Assert.False(User(id).IsPaid);}}
     [Fact] public async Task CookieKeysSurviveASecondApplicationInstance(){var(c,id,email)=await Account();using(c){var login=await c.PostAsJsonAsync("/api/auth/login",new{email,password="a-test-password-123"});var cookie=login.Headers.GetValues("Set-Cookie").Single().Split(';')[0];using var otherFactory=factory.WithWebHostBuilder(_=>{});using var other=otherFactory.CreateClient();other.DefaultRequestHeaders.Add("Cookie",cookie);Assert.Equal(HttpStatusCode.OK,(await other.GetAsync("/api/checkout/status")).StatusCode);Assert.True(database.Scalar("SELECT count(*) FROM data_protection_keys")>0);}}
+    static JsonObject DigitalProduct()=>JsonNode.Parse("{\"id\":\"prd_unit_test\",\"name\":\"Test\",\"status\":\"published\",\"type\":\"license\",\"settings\":{},\"pricing\":{\"type\":\"one_time\",\"current_price\":{\"value\":29,\"formatted\":\"29 EUR\",\"currency\":\"EUR\"}}}")!.AsObject();
+    [Theory][InlineData("null")][InlineData("0")][InlineData("false")][InlineData("\"false\"")][InlineData("\"0\"")][InlineData("missing-flag")][InlineData("missing-settings")][InlineData("null-settings")]
+    public async Task OptionalShippingFlagAllowsOfferAndCheckoutWithoutActivatingUser(string representation){
+        provider.ProductOverride=DigitalProduct();
+        if(representation=="missing-settings")provider.ProductOverride.Remove("settings");
+        else if(representation=="null-settings")provider.ProductOverride["settings"]=null;
+        else if(representation!="missing-flag")provider.ProductOverride["settings"]!["is_requires_shipping_address"]=JsonNode.Parse(representation);
+        var(c,id,email)=await Account();using(c){
+            var offer=await c.GetAsync("/api/checkout/offer");Assert.Equal(HttpStatusCode.OK,offer.StatusCode);
+            var price=(await offer.Content.ReadFromJsonAsync<JsonObject>())!["price"]!;Assert.Equal(29,price["value"]!.GetValue<decimal>());
+            Assert.Equal(HttpStatusCode.OK,(await c.PostAsJsonAsync("/api/checkout",Customer(email))).StatusCode);
+            Assert.Equal(1,provider.Checkouts);Assert.Equal(id,provider.LastCheckout!["custom_metadata"]!["user_id"]!.GetValue<string>());Assert.False(User(id).IsPaid);
+        }
+    }
+    [Theory][InlineData("true")][InlineData("1")][InlineData("\"true\"")][InlineData("\"1\"")]
+    public async Task ShippingRequirementStillBlocksRemoteCheckout(string representation){
+        provider.ProductOverride=DigitalProduct();provider.ProductOverride["settings"]!["is_requires_shipping_address"]=JsonNode.Parse(representation);
+        var(c,id,email)=await Account();using(c){
+            Assert.Equal(HttpStatusCode.ServiceUnavailable,(await c.GetAsync("/api/checkout/offer")).StatusCode);
+            Assert.Equal(HttpStatusCode.ServiceUnavailable,(await c.PostAsJsonAsync("/api/checkout",Customer(email))).StatusCode);
+            Assert.Equal(0,provider.Checkouts);Assert.False(User(id).IsPaid);
+        }
+    }
     [Fact] public void HmacDependsOnRawBytes(){var raw=Encoding.UTF8.GetBytes("{\"a\":1}");var signature="sha256="+Convert.ToHexString(HMACSHA256.HashData(Encoding.UTF8.GetBytes(Secret),raw)).ToLowerInvariant();Assert.True(PulseVerifier.Verify(raw,signature,Secret));Assert.False(PulseVerifier.Verify(Encoding.UTF8.GetBytes("{ \"a\": 1 }"),signature,Secret));}
     public void Dispose(){factory.Dispose();database.Dispose();}
     class ProviderStub:HttpMessageHandler {

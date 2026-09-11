@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   checkPaymentStatus,
@@ -235,4 +236,13 @@ describe("Checkout service and Material payment screens (DOM only)", () => {
       false,
     );
   });
+});
+
+// Font files are not rendered by HappyDOM: verify the scoped CSS contract instead.
+it("uses the full Material Symbols font for the active pricing icon in both menus", () => {
+  const css = readFileSync("src/payments.css", "utf8");
+  expect(css).toMatch(
+    /\.sidebar \.nav-link\[href="#pricing"\] \.icon,\s*\.bottom-nav a\[href="#pricing"\] \.icon\s*\{[^}]*font-family:\s*"Material Symbols Rounded"/,
+  );
+  expect(css).toContain("flex: 0 0 24px;");
 });

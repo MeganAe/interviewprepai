@@ -217,8 +217,14 @@
   color: var(--onSurfaceVariant);
   line-height: 1.8;
 }
+/* credit_card is not in the small filled-symbol subset used by active links. */
+.sidebar .nav-link[href="#pricing"] .icon,
 .bottom-nav a[href="#pricing"] .icon {
   font-family: "Material Symbols Rounded";
+  text-transform: none;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
 }
 .access-banner {
   display: flex;

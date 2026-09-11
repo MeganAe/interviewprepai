@@ -1,4 +1,3 @@
-using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -26,16 +25,45 @@ public sealed class ChariowClient(IHttpClientFactory factory,IConfiguration conf
         var product=response["data"] as JsonObject??throw new ApiError("Tarif indisponible.",502);
         if(SalePayload.Text(product["id"])!=ProductId)throw new ApiError("Configurez l’identifiant public exact du produit de paiement, et non son slug.",503);
         var pricing=product["pricing"] as JsonObject??throw new ApiError("Tarif indisponible.",502);
-        var settings=product["settings"] as JsonObject??throw new ApiError("Configuration du produit invalide.",502);
-        if(settings["is_requires_shipping_address"] is not JsonValue shipping||!shipping.TryGetValue<bool>(out var needsShipping))throw new ApiError("Configuration de livraison invalide.",502);
-        if(SalePayload.Text(product["status"])!="published" || SalePayload.Text(product["type"]) is not ("license" or "downloadable" or "course" or "bundle") || SalePayload.Text(pricing["type"]) is not ("one_time" or "free") || needsShipping)
-            throw new ApiError("Le produit configuré ne permet pas ce paiement en ligne. Contactez l’administrateur.",503);
+        if(SalePayload.Text(product["status"])!="published")
+            throw new ApiError("Le produit Chariow doit être publié avant de proposer le paiement.",503);
+        if(SalePayload.Text(product["type"]) is not ("license" or "downloadable" or "course" or "bundle"))
+            throw new ApiError("Ce type de produit Chariow n’est pas pris en charge. Utilisez un produit licence, téléchargement, cours ou bundle.",503);
+        if(SalePayload.Text(pricing["type"]) is not ("one_time" or "free"))
+            throw new ApiError("Configurez un prix fixe à paiement unique pour ce produit Chariow.",503);
+        if(RequiresShipping(product["settings"]))
+            throw new ApiError("Ce produit exige une adresse de livraison. Désactivez cette exigence dans Chariow pour l’accès numérique.",503);
         // This form intentionally supports no extra product-specific checkout fields.
         if(product["fields"] is not null && product["fields"] is not JsonArray {Count:0} && product["fields"] is not JsonObject {Count:0})
             throw new ApiError("Ce produit demande des champs de paiement supplémentaires non pris en charge. Contactez l’administrateur.",503);
         var price=pricing["current_price"] as JsonObject;
         if(price?["value"] is not JsonValue pv||!pv.TryGetValue<decimal>(out var amount)||amount<0||string.IsNullOrWhiteSpace(SalePayload.Text(price["formatted"]))||string.IsNullOrWhiteSpace(SalePayload.Text(price["currency"])))throw new ApiError("Le tarif du produit est incomplet.",502);
         cache.Set(key,product.DeepClone().AsObject(),TimeSpan.FromSeconds(60));return product;
+    }
+    // Provider flags can be omitted/null or represented as JSON booleans, 0/1,
+    // or their string equivalents. Only explicit known representations are accepted.
+    // An unset flag does not declare a shipping requirement. Non-digital product
+    // types are rejected separately; this flag can never activate an entitlement.
+    public static bool RequiresShipping(JsonNode? settings) {
+        if(settings is null)return false;
+        if(settings is not JsonObject obj)
+            throw new ApiError("La configuration du produit reçue de Chariow est invalide.",502);
+        var flag=obj["is_requires_shipping_address"];
+        if(flag is null)return false;
+        if(flag is JsonValue value) {
+            if(value.TryGetValue<bool>(out var boolean))return boolean;
+            if(value.TryGetValue<decimal>(out var number)) {
+                if(number==0)return false;
+                if(number==1)return true;
+            }
+            if(value.TryGetValue<string>(out var text)) {
+                switch(text.Trim().ToLowerInvariant()) {
+                    case "":case "0":case "false":return false;
+                    case "1":case "true":return true;
+                }
+            }
+        }
+        throw new ApiError("Le paramètre de livraison reçu de Chariow n’est pas reconnu. Contactez l’administrateur.",502);
     }
     public Task<JsonObject> Checkout(object body,CancellationToken ct)=>Send(HttpMethod.Post,"checkout",body,ct);
     public static bool ValidCheckoutUrl(string? url)=>Uri.TryCreate(url,UriKind.Absolute,out var uri)&&uri.Scheme=="https"&&string.IsNullOrEmpty(uri.UserInfo)&&url!.Length<=2048;
