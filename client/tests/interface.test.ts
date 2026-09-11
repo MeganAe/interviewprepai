@@ -156,7 +156,7 @@ describe.sequential(
       expect(document.querySelector(".sidebar")).toBeNull();
       expect(el("h1").textContent).toContain("Trouvez les mots");
     });
-    it("uses the original logo and correct semantic illustration containers", () => {
+    it("uses the interview conversation logo and correct semantic illustration containers", () => {
       expect(
         document.querySelector(".wordmark .brand-symbol path"),
       ).not.toBeNull();

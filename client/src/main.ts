@@ -28,6 +28,8 @@ import { pricingPage, mountPricing } from "./pages/pricing";
 import { merciPage, mountMerci } from "./pages/merci";
 import "./payments.css";
 import "./refinements.css";
+import "./expressive.css";
+import { initSiteMotion } from "./services/motion";
 
 type User = { id: string; name: string; email: string };
 type CV = {
@@ -613,6 +615,7 @@ function searchResults() {
   return `<div class="stack">${cs.length ? `<h2>CV · ${cs.length}</h2><div class="list">${cs.map((c) => `<div class="list-row"><span class="lead">${icon("description")}</span><button class="row-link" data-act="open-cv" data-id="${c.id}"><h3>${esc(c.name)}</h3><p>${esc(c.analysis.role)}</p></button>${ib("chevron_right", "Voir le CV", "open-cv", `data-id="${c.id}"`)}</div>`).join("")}</div>` : ""}${ss.length ? `<h2>Entretiens · ${ss.length}</h2><div class="list">${ss.map(sessionRow).join("")}</div>` : ""}${ns.length ? `<h2>Notes · ${ns.length}</h2><div class="notes-grid">${ns.map(noteCard).join("")}</div>` : ""}</div>`;
 }
 function render() {
+  app.dataset.direction = backward ? "back" : "forward";
   disposePaymentPage();
   disposePaymentPage = () => {};
   const r = route();
@@ -1630,6 +1633,10 @@ window.addEventListener("offline", () =>
   ),
 );
 window.addEventListener("online", () => toast("La connexion est rétablie."));
+const disposeSiteMotion = initSiteMotion(app);
+window.addEventListener("pagehide", (event) => {
+  if (!event.persisted) disposeSiteMotion();
+});
 render();
 async function boot() {
   try {
