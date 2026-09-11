@@ -23,11 +23,11 @@ public class AdminController(NpgsqlDataSource source,AdminAccess admin):Controll
     [Authorize,HttpGet("admin/users")]
     public async Task<object> Users(int page=1,string q="",string access="all",CancellationToken ct=default) {
         admin.Require(HttpContext);Page(page,q);if(access is not ("all" or "paid" or "unpaid" or "admin"))throw new ApiError("Filtre invalide.",400);
-        const string where=" WHERE (@q='' OR strpos(lower(name||' '||email),lower(@q))>0) AND (@access='all' OR (@access='admin' AND id=@admin) OR (@access='paid' AND is_paid) OR (@access='unpaid' AND NOT is_paid AND id<>@admin))";
-        await using var cmd=source.CreateCommand("SELECT id,name,email,is_paid,paid_at FROM public.users"+where+" ORDER BY lower(name),id LIMIT 20 OFFSET @skip");
-        cmd.Parameters.AddWithValue("q",q.Trim());cmd.Parameters.AddWithValue("access",access);cmd.Parameters.AddWithValue("admin",admin.UserId??"");cmd.Parameters.AddWithValue("skip",(page-1)*20);
-        var items=new List<object>();await using(var r=await cmd.ExecuteReaderAsync(ct)){while(await r.ReadAsync(ct))items.Add(new{id=r.GetString(0),name=r.GetString(1),email=r.GetString(2),is_paid=r.GetBoolean(3),paid_at=r.IsDBNull(4)?(DateTime?)null:r.GetDateTime(4),is_admin=admin.IsAdmin(r.GetString(0))});}
-        var total=await Count("SELECT count(*) FROM public.users"+where,ct,("q",q.Trim()),("access",access),("admin",admin.UserId??""));return new{items,total,page,page_size=20};
+        const string where=" WHERE (@q='' OR strpos(lower(name||' '||email),lower(@q))>0) AND (@access='all' OR (@access='admin' AND is_admin) OR (@access='paid' AND is_paid) OR (@access='unpaid' AND NOT is_paid AND NOT is_admin))";
+        await using var cmd=source.CreateCommand("SELECT id,name,email,is_paid,paid_at,is_admin FROM public.users"+where+" ORDER BY lower(name),id LIMIT 20 OFFSET @skip");
+        cmd.Parameters.AddWithValue("q",q.Trim());cmd.Parameters.AddWithValue("access",access);cmd.Parameters.AddWithValue("skip",(page-1)*20);
+        var items=new List<object>();await using(var r=await cmd.ExecuteReaderAsync(ct)){while(await r.ReadAsync(ct))items.Add(new{id=r.GetString(0),name=r.GetString(1),email=r.GetString(2),is_paid=r.GetBoolean(3),paid_at=r.IsDBNull(4)?(DateTime?)null:r.GetDateTime(4),is_admin=r.GetBoolean(5)});}
+        var total=await Count("SELECT count(*) FROM public.users"+where,ct,("q",q.Trim()),("access",access));return new{items,total,page,page_size=20};
     }
     [Authorize,HttpGet("admin/payments")]
     public async Task<object> Payments(int page=1,string q="",CancellationToken ct=default) {

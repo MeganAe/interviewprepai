@@ -1,5 +1,7 @@
 # V5 — Logo texte, pages publiques, support et administration
 
+> **Guide historique v5.** Dans la v5.1, la gestion du rôle par variable Render est remplacée par `public.users.is_admin`. Consultez `ADMIN-SUPABASE-V5.1.md` : n’importez plus `admin-v5.env` et n’utilisez plus `Admin__UserId`. Les autres fonctionnalités v5 sont conservées.
+
 ## Ce qui est livré
 
 - **Logo « Interview Prep AI » uniquement typographique** : Roboto Serif, sans pictogramme, sans badge et sans pastille « AI ». Intégré aux en-têtes, pieds de page et écrans de chargement. Favicon « IP » en lettres uniquement. Les fichiers SVG de marque sont vectorisés.

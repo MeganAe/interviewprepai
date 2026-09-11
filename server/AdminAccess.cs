@@ -1,12 +1,14 @@
-// A single, immutable account ID is selected by the operator, never by a browser/email claim.
-public sealed class AdminAccess(IConfiguration config) {
-    public string? UserId {
-        get {
-            var value=config["Admin:UserId"]?.Trim();
-            return Guid.TryParse(value,out var id) && id!=Guid.Empty ? id.ToString() : null;
-        }
+using Npgsql;
+
+// The application role is read from PostgreSQL on every authorization check.
+// No cookie role, environment fallback, email heuristic or process-wide role cache.
+// The partial unique index on users.is_admin enforces at most one administrator.
+public sealed class AdminAccess(NpgsqlDataSource source) {
+    public bool IsAdmin(string id) {
+        using var cmd=source.CreateCommand("SELECT is_admin FROM public.users WHERE id=@id");
+        cmd.Parameters.AddWithValue("id",id);
+        return cmd.ExecuteScalar() is true;
     }
-    public bool IsAdmin(string id)=>UserId is string selected && string.Equals(selected,id,StringComparison.Ordinal);
     public void Require(HttpContext context) {
         if(!IsAdmin(Auth.Id(context)))throw new ApiError("Cet espace est réservé à l’administrateur.",403);
     }

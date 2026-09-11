@@ -1,4 +1,6 @@
-# Interview Prep AI — v5
+# Interview Prep AI — v5.1
+
+> **V5.1 — Admin dans Supabase uniquement.** Suivez `docs/ADMIN-SUPABASE-V5.1.md`. Le champ `public.users.is_admin` remplace `Admin__UserId`, qui est désormais ignoré. Pour une base existante, exécutez `database/mise-a-jour-supabase-v5.1.sql` puis déployez le correctif. Pour une base neuve, utilisez `database/schema.sql`. Les paragraphes ci-dessous concernant l’admin par variable Render sont historiques et ne s’appliquent plus. Sortie actuelle : `BUILD-V5.1.txt`.
 
 > **V5 — Support et administration.** Lisez d’abord `docs/MISE-A-JOUR-V5.md`. Pour votre site existant : exécuter `database/migration-v5.sql`, déposer le correctif GitHub, puis renseigner `Admin__UserId` dans Render. Pour une installation neuve : utiliser le fichier **`database/schema.sql` actuel**, pas l’ancien extrait SQL reproduit dans le guide historique ci-dessous. La v5 ajoute trois tables. Le compte admin a un accès gratuit distinct du paiement. Les tests actuels (213), leurs limites et la compilation sont dans `BUILD-V5.txt`.
 

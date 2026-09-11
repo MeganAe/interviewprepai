@@ -13,7 +13,8 @@ public class CheckoutController(Store db,ChariowClient chariow,IConfiguration co
     [HttpGet("status")]
     public async Task<IActionResult> Status(CancellationToken ct) {
         var user=await db.UserByIdAsync(Auth.Id(HttpContext),ct);if(user==null)return Unauthorized();
-        return Ok(new{is_paid=user.IsPaid,paid_at=user.PaidAt,is_admin=admin.IsAdmin(user.Id),has_access=user.IsPaid||admin.IsAdmin(user.Id)});
+        var isAdmin=admin.IsAdmin(user.Id);
+        return Ok(new{is_paid=user.IsPaid,paid_at=user.PaidAt,is_admin=isAdmin,has_access=user.IsPaid||isAdmin});
     }
     [AllowAnonymous,HttpGet("offer"),EnableRateLimiting("offer")]
     public async Task<IActionResult> Offer(CancellationToken ct) {

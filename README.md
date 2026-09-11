@@ -1,6 +1,6 @@
-# Interview Prep AI — v5
+# Interview Prep AI — v5.1
 
-**V5 :** logo uniquement typographique, Support/Contact, conversations privées et administration avec accès gratuit pour un seul compte configuré côté serveur. **Commencez par [la mise à jour v5](docs/MISE-A-JOUR-V5.md)** : petit ajout SQL et `Admin__UserId` à renseigner. Les secrets existants et le correctif TLS sont conservés.
+**V5.1 :** le rôle administrateur se gère directement dans **Supabase → public.users → is_admin**, sans variable Render. [Installer le correctif](docs/ADMIN-SUPABASE-V5.1.md) une fois, puis gérer le rôle uniquement en base. Logo texte, pages publiques, messagerie et accès admin gratuit de la v5 conservés.
 
 Application française de préparation aux entretiens. Frontend TypeScript/Material Web, thème Amber clair, Roboto Serif et logo personnalisé. Backend ASP.NET Core 8, PostgreSQL Supabase via Npgsql, paiement Chariow et préparation Render Docker.
 
@@ -13,7 +13,7 @@ Application française de préparation aux entretiens. Frontend TypeScript/Mater
 3. Déployer ce dépôt sur Render avec le `Dockerfile` à la racine, ou avec le Blueprint `render.yaml`.
 4. Configurer le Pulse Chariow vers `https://ton-app.onrender.com/api/pulse`.
 
-Le frontend s’ouvre sur la page publique. Les comptes non payés peuvent consulter `#pricing`. Le tarif est lu chez Chariow, jamais inventé. Pour les comptes ordinaires, seule une vente terminée avec signature valide et métadonnées du bon compte active l’accès. Le compte désigné par `Admin__UserId` dispose d’un accès admin gratuit distinct ; il n’est pas marqué payé artificiellement. Le retour `#merci` attend la confirmation enregistrée en base.
+Le frontend s’ouvre sur la page publique. Les comptes non payés peuvent consulter `#pricing`. Le tarif est lu chez Chariow, jamais inventé. Pour les comptes ordinaires, seule une vente terminée avec signature valide et métadonnées du bon compte active l’accès. Le compte dont `public.users.is_admin` vaut `true` dispose d’un accès admin gratuit distinct ; il n’est pas marqué payé artificiellement. Le retour `#merci` attend la confirmation enregistrée en base.
 
 ## Développement
 
@@ -31,7 +31,7 @@ La v3 n’utilise plus `DataPath`, `App_Data` ou SQLite au démarrage. L’outil
 
 ## Vérifications et limites
 
-**213 tests réussis : 93 DOM, 115 API/.NET sur PostgreSQL, 5 migration.** Compilation de production frontend et publication .NET Linux documentées dans `BUILD-V5.txt`.
+**221 tests réussis : 93 DOM, 123 API/.NET sur PostgreSQL, 5 migration.** Compilation de production frontend et publication .NET Linux documentées dans `BUILD-V5.1.txt`.
 
 Aucune vérification navigateur, aucun paiement réel, aucun appel Gemini réel, aucun déploiement Supabase/Render. L’image Docker n’a pas été construite ici, faute de moteur Docker ; le frontend et la publication .NET Linux ont été compilés. Les identifiants prestataires et les informations commerciales restent à renseigner.
 

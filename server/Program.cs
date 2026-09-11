@@ -85,7 +85,7 @@ app.Use(async(ctx,next)=>{
 });
 app.UseDefaultFiles(); app.UseStaticFiles();
 app.MapGet("/api/health", async(NpgsqlDataSource source,IConfiguration c,CancellationToken ct)=>{
-    try{await using var cmd=source.CreateCommand("SELECT u.is_paid,u.paid_at,u.chariow_sale_id,r.\"userId\",p.sale_id,c.response,k.xml FROM public.users u,public.records r,public.payment_receipts p,public.checkout_sessions c,public.data_protection_keys k,public.support_tickets st,public.support_messages sm,public.site_settings ss WHERE false");await cmd.ExecuteNonQueryAsync(ct);return Results.Ok(new{status="ok",geminiConfigured=!string.IsNullOrWhiteSpace(c["Gemini:ApiKey"])});}
+    try{await using var cmd=source.CreateCommand("SELECT u.is_admin,u.is_paid,u.paid_at,u.chariow_sale_id,r.\"userId\",p.sale_id,c.response,k.xml FROM public.users u,public.records r,public.payment_receipts p,public.checkout_sessions c,public.data_protection_keys k,public.support_tickets st,public.support_messages sm,public.site_settings ss WHERE false");await cmd.ExecuteNonQueryAsync(ct);return Results.Ok(new{status="ok",geminiConfigured=!string.IsNullOrWhiteSpace(c["Gemini:ApiKey"])});}
     catch{return Results.Json(new{status="unavailable"},statusCode:503);}
 });
 app.MapPost("/api/auth/register", async (Credentials input, Store db, HttpContext ctx) => {
